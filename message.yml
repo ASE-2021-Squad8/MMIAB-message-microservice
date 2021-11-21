@@ -1,0 +1,322 @@
+openapi: "3.0.1"
+info:
+  title: Message Service API
+  description: Message Microservice of Message in a Bottle Application
+  version: "0.1"
+
+servers:
+  - url: /api
+
+paths:
+  /message:
+    post:
+      summary: Add a new message
+      tags:
+        - Message
+      operationId: mib.resources.messages.save_message
+      requestBody:
+        description: Create a  new message
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+      responses:
+        201:
+          description: Created
+        404:
+          description: User does not  exists
+        default:
+          description: Error during creation of the user
+    put:
+      tags: [Message]
+      description: update message state 
+      operationId: mib.resources.message.update_state
+      requestBody:
+        description: Update message state
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMessageState'
+      responses:
+        200:
+          description: Message state updated
+        404:
+          description: Message not found
+        default:
+          description: An error occured during the message satate updateing
+      
+
+  /message/{message_id}:
+    get:
+      tags: [ Message ]
+      description: Get a message by id
+      operationId: mib.resources.message.get_message
+      parameters:
+        - name: message_id
+          description: Message Unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Return message
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Message'
+        404:
+          description: Message not found
+        default:
+          description: An error occured during retrieving the message
+  /message/{user_id}/sent:
+     get:
+      tags: [ Message ]
+      description: Get all sent messages of an user
+      operationId: mib.resources.message.get_all_message_sent
+      parameters:
+        - name: user_id
+          description: User Unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Return messages
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Message'
+        404:
+          description: User not found
+        default:
+          description: An error occured during retrieving the messages
+  /message/{user_id}/received:
+     get:
+      tags: [ Message ]
+      description: Get all received messages of an user
+      operationId: mib.resources.message.get_all_message_received
+      parameters:
+        - name: user_id
+          description: User Unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Return messages
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Message'
+        404:
+          description: User not found
+        default:
+          description: An error occured during retrieving the messages
+  /message/{user_id}/received/metadata:
+    get:
+      tags: [ Message ]
+      description: Get all received messages metadata of an user
+      operationId: mib.resources.message.get_all_message_received_metadata
+      parameters:
+        - name: user_id
+          description: User Unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Return messages
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/MessageMetadata'
+        404:
+          description: User not found
+        default:
+          description: An error occured during retrieving the metadata
+  /message/{user_id}/sent/metadata:
+    get:
+      tags: [ Message ]
+      description: Get all sent messages metadata of an user
+      operationId: mib.resources.message.get_all_message_sent_metadata
+      parameters:
+        - name: user_id
+          description: User Unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Return messages
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/MessageMetadata'
+        404:
+          description: User not found
+        default:
+          description: An error occured during retrieving the metadata
+  
+  /message/unsent:
+     get:
+      tags: [ Message ]
+      description: Get all messages to be sent
+      operationId: mib.resources.message.get_message_to_send
+      responses:
+        200:
+          description: Return messages
+        default:
+          description: An error occured during retrieving the messages
+  
+  
+  
+  
+  /message/draft/{draft_id}:
+    get:
+      tags:
+        - Draft
+      description: Get a draft by id
+      operationId: mib.resources.message.get_draft
+      parameters:
+        - name: draft_id
+          description: Message Unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Return the draft
+        404:
+          description: Draft not found
+        default:
+          description: An error occured during retrieving the draft
+    delete:
+      tags:
+        [Draft]
+      description: Delete a draft by id
+      operationId: mib.resources.message.delete_draft
+      parameters:
+        - name: draft_id
+          description: Message Unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Delete the draft
+        404:
+          description: Draft not found
+        default:
+          description: An error occured during retrieving the draft
+  
+      
+components:
+  schemas:
+    Message:
+      required:
+        - text
+        - sender
+        - recipient
+        - media
+        - delivery_date
+        - is_draft
+        - is_delivered
+        - is_read
+        - is_deleted
+      type: object
+      properties:
+        text:
+          type: string
+          description: message body
+          example: 'Hi mate!'
+        sender:
+          type: integer
+          description: sender's id
+          example: 1
+        recipient:
+          type: integer
+          description: recipient's id
+          example: 2
+        media:
+          type: string
+          description: Attachment name hashed
+          example: 'lkanlkdnbkjabuidbakjbddabkd.png'
+        delivery_date:
+          type: string
+          description: when the message will be sent
+          example: '2021-11-21T16:15'
+          format: date
+        is_draft::
+          type: boolean 
+          description: states if a message is a draft
+          example: true
+        is_delivered:
+          type: boolean 
+          description: states if a message has been delivered
+          example: true
+        is_read:
+          type: boolean 
+          description: states if a message has been read
+          example: true
+        is_deleted:
+          type: boolean 
+          description: states if a message has been deleted on recipient side
+          example: true
+    UpdateMessageState:
+      required:
+        - message_id
+        - attribute
+        - value
+      type: object
+      properties:
+        messsage_id:
+          type: integer
+          description: message id
+          example: 1
+          format: int64
+        attribute:
+          type: string
+          description: message attribute
+          example: 'is_deleted'
+        value:
+          type: boolean
+          description: new state
+          example: true
+          
+    MessageMetadata:
+      - sender
+      - recipient
+      - media
+      type: object
+      properties:
+        sender:
+          type: integer
+          description: sender's id
+          example: 1
+        recipient:
+          type: integer
+          description: recipient's id
+          example: 2
+        media:
+          type: string
+          description: Attachment name hashed
+          example: 'lkanlkdnbkjabuidbakjbddabkd.png'
+      
+      
+      
