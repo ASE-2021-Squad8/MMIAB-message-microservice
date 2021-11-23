@@ -10,22 +10,22 @@ servers:
 paths:
   /message:
     post:
-      summary: Add a new message
+      summary: Save and schedule a new message to send
       tags:
         - Message
-      operationId: mib.resources.messages.save_message
+      operationId: mib.resources.messages.send_message
       requestBody:
         description: Create a new message
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Message'
+              $ref: '#/components/schemas/MessageSave'
       responses:
         201:
           description: Created
         404:
-          description: User does not  exists
+          description: User does not exists
         default:
           description: Error during creation of the user
     put:
@@ -45,7 +45,7 @@ paths:
         404:
           description: Message not found
         default:
-          description: An error occured during the message satate updateing
+          description: An error occured during the message state updating
 
   /message/{message_id}:
     get:
@@ -90,8 +90,10 @@ paths:
           description: Return messages
           content: 
             application/json:
-              schema: 
-                $ref: '#/components/schemas/MessageMetadata'
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageMetadata'
         404:
           description: User not found
         default:
@@ -115,8 +117,10 @@ paths:
           description: Return messages
           content: 
             application/json:
-              schema: 
-                $ref: '#/components/schemas/MessageMetadata'
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageMetadata'
         404:
           description: User not found
         default:
@@ -139,6 +143,10 @@ paths:
       responses:
         200:
           description: Return the draft
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Draft'
         404:
           description: Draft not found
         default:
@@ -189,14 +197,14 @@ paths:
         default:
           description: An error occured during retrieving the draft
   
-  /message/draft/{draft_id}/attachment:
+  /message/{message_id}/attachment:
     get:
       tags:
-        [Draft]
-      summary: Retrieves an attachment for a draft
-      operationId: mib.resources.message.get_draft_attachment
+        [Message]
+      summary: Retrieves an attachment for a message
+      operationId: mib.resources.message.get_message_attachment
       parameters:
-        - name: draft_id
+        - name: message_id
           description: Message Unique ID
           in: path
           required: true
@@ -206,37 +214,92 @@ paths:
       responses:
         200:
           description: The attachment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  media:
+                    type: string
+                    format: binary
+                    description: Attachment
         404:
-          description: Draft not found
+          description: Message not found
     
-  /message/sent/between-dates:
-    put:
+  /message/{user_id}/sent/{day}/{month}/{year}:
+    get:
       tags:
         [Message]
       summary: Gets all messages sent in a time interval (includes yet to be delivered)
       operationId: mib.resources.message.between_dates
-      requestBody:
-        description: Retrieves messages between two dates
-        required: true
-        content:
-          application/json:
-            schema:
-              required:
-                - from
-                - to
-              type: object
-              properties:
-                to:
-                  type: string
-                  example: '2021-11-21T16:15'
-                  format: date
-                from:
-                  type: string
-                  example: '2021-12-11T10:55'
-                  format: date
+      parameters:
+        - name: user_id
+          description: User Unique ID
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: day
+          description: day
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 31
+        - name: month
+          description: month
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 12
+        - name: year
+          description: year
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1900
       responses:
         200:
           description: Returns a JSON array with messages
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  properties:
+                    message_id:
+                      type: integer
+                      format: int64
+                      example: 1
+                    firstname: 
+                      type: string
+                      example: mario
+                    email: 
+                      type: string
+                      format: email
+                      example: mario.rossi@example.org
+                    text:
+                      type: string
+                      example: 'Hi mate!'
+                    delivered:
+                      type: boolean
+                      example: false
+                    candelete: 
+                      type: boolean
+                      example: true
+                    future:
+                      type: boolean
+                      example: true
+        404:
+          description: User id not found
         default:
           description: Something went wrong
   
@@ -263,6 +326,25 @@ paths:
           description: Not enough points
         404:
           description: Message not found
+  
+  /message/draft:
+    post:
+      summary: Save a new draft
+      tags:
+        - Draft
+      operationId: mib.resources.messages.save_draft
+      requestBody:
+        description: Create a new draft
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DraftSave'
+      responses:
+        200:
+          description: Draft saved
+        default:
+          description: An error occured while saving the draft
   
 components:
   schemas:
@@ -300,7 +382,7 @@ components:
           description: when the message will be sent
           example: '2021-11-21T16:15'
           format: date
-        is_draft::
+        is_draft:
           type: boolean 
           description: states if a message is a draft
           example: true
@@ -349,7 +431,7 @@ components:
         - value
       type: object
       properties:
-        messsage_id:
+        message_id:
           type: integer
           description: message id
           example: 1
@@ -382,3 +464,66 @@ components:
           type: boolean
           description: true if the message has an attachment
           example: true
+          
+    MessageSave:
+      required:
+        - text
+        - sender
+        - recipient
+        - media
+        - delivery_date
+        - is_draft
+      type: object
+      properties:
+        text:
+          type: string
+          description: message body
+          example: 'Hi mate!'
+        sender:
+          type: integer
+          description: sender's id
+          example: 1
+        recipient:
+          type: integer
+          description: recipient's id
+          example: 2
+        media:
+          type: string
+          format: binary
+          description: Attachment
+        delivery_date:
+          type: string
+          description: when the message will be sent
+          example: '2021-11-21T16:15'
+          format: date
+        is_draft:
+          type: boolean 
+          description: states if a message is a draft
+          example: true
+          
+    DraftSave:
+      required:
+        - sender
+      type: object
+      properties:
+        text:
+          type: string
+          description: message body
+          example: 'Hi mate!'
+        sender:
+          type: integer
+          description: sender's id
+          example: 1
+        recipient:
+          type: integer
+          description: recipient's id
+          example: 2
+        media:
+          type: string
+          format: binary
+          description: Attachment
+        delivery_date:
+          type: string
+          description: when the message will be sent
+          example: '2021-11-21T16:15'
+          format: date
