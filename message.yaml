@@ -369,6 +369,21 @@ paths:
                 items:
                   $ref: '#/components/schemas/MessageMetadata'
           description: Return all user's draft
+    
+    /message/unsent:
+      get:
+        summary: Retrieve all message that should have been sent
+        tags:
+          - Message
+        response:
+          200:
+            content:
+              application/json:
+              schema:
+                type: array
+                items:
+                   $ref: '#/components/schemas/MessageMetadata'
+            description: Return all message that should have been sent
       
   
 components:
