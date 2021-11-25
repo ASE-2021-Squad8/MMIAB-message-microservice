@@ -1,410 +1,400 @@
-openapi: "3.0.1"
+openapi: 3.0.1
 info:
   title: Message Service API
   description: Message Microservice of Message in a Bottle Application
   version: "0.1"
-
 servers:
-  - url: /api
-
+- url: /api
 paths:
   /message:
-    post:
-      summary: Save and schedule a new message to send
-      tags:
-        - Message
-      operationId: send_message
-      requestBody:
-        description: Create a new message
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MessageSave'
-      responses:
-        201:
-          description: Created
-        404:
-          description: User does not exists
-        default:
-          description: Error during creation of the user
     put:
-      tags: [Message]
+      tags:
+      - Message
       summary: Updates the message state
-      operationId: mib.resources.message.update_state
+      operationId: mib.resources.message.update_message_state
       requestBody:
         description: Update message state
-        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/MessageState'
+        required: true
       responses:
-        200:
+        "200":
           description: Message state updated
-        404:
+        "404":
           description: Message not found
         default:
           description: An error occured during the message state updating
-
+    post:
+      tags:
+      - Message
+      summary: Save and schedule a new message to send
+      operationId: mib.resources.message.send_message
+      requestBody:
+        description: Create a new message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageSave'
+        required: true
+      responses:
+        "201":
+          description: Created
+        "404":
+          description: User does not exists
+        default:
+          description: Error during creation of the user
   /message/{message_id}:
     get:
-      tags: [ Message ]
+      tags:
+      - Message
       summary: Get a message by id
-      operationId: get_message
+      operationId: mib.resources.message.get_message_by_id
       parameters:
-        - name: message_id
-          description: Message Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: message_id
+        in: path
+        description: Message Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        200:
+        "200":
           description: Return message
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/Message'
-        404:
+        "404":
           description: Message not found
         default:
           description: An error occured during retrieving the message
-
   /message/{user_id}/received/metadata:
     get:
-      tags: [ Message ]
+      tags:
+      - Message
       summary: Get all received messages metadata of an user
-      operationId: get_all_messages_received_metadata
+      operationId: mib.resources.message.get_all_received_messages_metadata
       parameters:
-        - name: user_id
-          description: User Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: user_id
+        in: path
+        description: User Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        200:
+        "200":
           description: Return messages
-          content: 
+          content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/MessageMetadata'
-        404:
+        "404":
           description: User not found
         default:
           description: An error occured during retrieving the metadata
-  
   /message/{user_id}/sent/metadata:
     get:
-      tags: [ Message ]
+      tags:
+      - Message
       summary: Get all sent messages metadata of an user
-      operationId: get_all_messages_sent_metadata
+      operationId: mib.resources.message.get_all_sent_messages_metadata
       parameters:
-        - name: user_id
-          description: User Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: user_id
+        in: path
+        description: User Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        200:
+        "200":
           description: Return messages
-          content: 
+          content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/MessageMetadata'
-        404:
+        "404":
           description: User not found
         default:
           description: An error occured during retrieving the metadata
-  
   /message/draft/{draft_id}:
     get:
       tags:
-        - Draft
+      - Draft
       summary: Get a draft by id
-      operationId: get_draft
+      operationId: mib.resources.draft.get_draft_by_id
       parameters:
-        - name: draft_id
-          description: Message Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: draft_id
+        in: path
+        description: Message Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        200:
+        "200":
           description: Return the draft
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Draft'
-        404:
+        "404":
           description: Draft not found
         default:
           description: An error occured during retrieving the draft
     put:
       tags:
-        [Draft]
+      - Draft
       summary: Updates a draft
-      operationId: update_draft
+      operationId: mib.resources.draft.update_draft
       parameters:
-        - name: draft_id
-          description: Message Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: draft_id
+        in: path
+        description: Message Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       requestBody:
         description: Update draft state
-        required: true
         content:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Draft'
+        required: true
       responses:
-        200:
+        "200":
           description: Draft updated
-        404:
+        "404":
           description: Draft not found
     delete:
       tags:
-        [Draft]
+      - Draft
       summary: Delete a draft by id
-      operationId: delete_draft
+      operationId: mib.resources.draft.delete_draft
       parameters:
-        - name: draft_id
-          description: Message Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: draft_id
+        in: path
+        description: Message Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        200:
+        "200":
           description: Delete the draft
-        404:
+        "404":
           description: Draft not found
         default:
           description: An error occured during retrieving the draft
-  
   /message/{message_id}/attachment:
     get:
       tags:
-        [Message]
+      - Message
       summary: Retrieves an attachment for a message
-      operationId: get_message_attachment
+      operationId: mib.resources.message.get_message_attachment
       parameters:
-        - name: message_id
-          description: Message Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: message_id
+        in: path
+        description: Message Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        200:
+        "200":
           description: The attachment
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  media:
-                    type: string
-                    format: binary
-                    description: Attachment
-        404:
+                $ref: '#/components/schemas/inline_response_200'
+        "404":
           description: Message not found
-    
   /message/{user_id}/sent/{day}/{month}/{year}:
     get:
       tags:
-        [Message]
+      - Message
       summary: Gets all messages sent in a time interval (includes yet to be delivered)
-      operationId: get_daily_message
+      operationId: mib.resources.message.get_daily_messages
       parameters:
-        - name: user_id
-          description: User Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: day
-          description: day
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-            maximum: 31
-        - name: month
-          description: month
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-            maximum: 12
-        - name: year
-          description: year
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-            minimum: 1900
+      - name: user_id
+        in: path
+        description: User Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      - name: day
+        in: path
+        description: day
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maximum: 31
+          minimum: 1
+          type: integer
+          format: int64
+      - name: month
+        in: path
+        description: month
+        required: true
+        style: simple
+        explode: false
+        schema:
+          maximum: 12
+          minimum: 1
+          type: integer
+          format: int64
+      - name: year
+        in: path
+        description: year
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1900
+          type: integer
+          format: int64
       responses:
-        200:
+        "200":
           description: Returns a JSON array with messages
           content:
             application/json:
-              schema: 
+              schema:
                 type: array
                 items:
-                  properties:
-                    message_id:
-                      type: integer
-                      format: int64
-                      example: 1
-                    firstname: 
-                      type: string
-                      example: mario
-                    email: 
-                      type: string
-                      format: email
-                      example: mario.rossi@example.org
-                    text:
-                      type: string
-                      example: 'Hi mate!'
-                    delivered:
-                      type: boolean
-                      example: false
-                    candelete: 
-                      type: boolean
-                      example: true
-                    future:
-                      type: boolean
-                      example: true
-        404:
+                  $ref: '#/components/schemas/inline_response_200_1'
+        "404":
           description: User id not found
         default:
           description: Something went wrong
-  
   /lottery/{message_id}:
     delete:
       tags:
-        [Message]
-      summary: Delete a message spending points
-      operationId: spend_points
+      - Message
+      summary: Deschedule a message spending points
+      operationId: mib.resources.message.delete_message_lottery_points
       parameters:
-        - name: message_id
-          description: Message Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: message_id
+        in: path
+        description: Message Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        200:
+        "200":
           description: Message deleted
-        400:
+        "400":
           description: Message already sent
-        401:
+        "401":
           description: Not enough points
-        404:
+        "404":
           description: Message not found
-  
   /message/draft:
     post:
-      summary: Save a new draft
       tags:
-        - Draft
-      operationId: save_draft
+      - Draft
+      summary: Save a new draft
+      operationId: mib.resources.draft.save_draft
       requestBody:
         description: Create a new draft
-        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/DraftSave'
+        required: true
       responses:
-        200:
+        "200":
           description: Draft saved
         default:
           description: An error occured while saving the draft
- 
   /message/{user_id}/draft:
     get:
-      summary: Retrieve all user's drafts
       tags:
-        - Draft
-      operationId: get_all_users_drafts
+      - Draft
+      summary: Retrieve all user's drafts
+      operationId: mib.resources.draft.get_all_user_drafts
       parameters:
-        - name: user_id
-          description: User Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+      - name: user_id
+        in: path
+        description: User Unique ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
       responses:
-        200:
+        "200":
+          description: Return all user's draft
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/MessageMetadata'
-          description: Return all user's draft
-    
-    /message/unsent:
-      get:
-        summary: Retrieve all message that should have been sent
-        tags:
-          - Message
-        response:
-          200:
-            content:
-              application/json:
+  /message/unsent:
+    get:
+      tags:
+      - Message
+      summary: Retrieve all message that should have been sent
+      operationId: mib.resources.message.get_unsent_messages
+      responses:
+        "200":
+          description: Return all message that should have been sent
+          content:
+            application/json:
               schema:
                 type: array
                 items:
-                   $ref: '#/components/schemas/MessageMetadata'
-            description: Return all message that should have been sent
-      
-  
+                  $ref: '#/components/schemas/MessageMetadata'
+
 components:
   schemas:
     Message:
       required:
-        - text
-        - sender
-        - recipient
-        - media
-        - delivery_date
-        - is_draft
-        - is_delivered
-        - is_read
-        - is_deleted
+      - delivery_date
+      - is_deleted
+      - is_delivered
+      - is_draft
+      - is_read
+      - media
+      - recipient
+      - sender
+      - text
       type: object
       properties:
         text:
           type: string
           description: message body
-          example: 'Hi mate!'
+          example: Hi mate!
         sender:
           type: integer
           description: sender's id
@@ -415,42 +405,50 @@ components:
           example: 2
         media:
           type: string
-          format: binary
           description: Attachment
+          format: binary
         delivery_date:
           type: string
           description: when the message will be sent
-          example: '2021-11-21T16:15'
           format: date
         is_draft:
-          type: boolean 
+          type: boolean
           description: states if a message is a draft
           example: true
         is_delivered:
-          type: boolean 
+          type: boolean
           description: states if a message has been delivered
           example: true
         is_read:
-          type: boolean 
+          type: boolean
           description: states if a message has been read
           example: true
         is_deleted:
-          type: boolean 
+          type: boolean
           description: states if a message has been deleted on recipient side
           example: true
-
+      example:
+        is_read: true
+        delivery_date: 2000-01-23
+        is_deleted: true
+        sender: 1
+        is_draft: true
+        is_delivered: true
+        recipient: 2
+        text: Hi mate!
+        media: ""
     Draft:
       required:
-        - text
-        - sender
-        - recipient
-        - media
+      - media
+      - recipient
+      - sender
+      - text
       type: object
       properties:
         text:
           type: string
           description: message body
-          example: 'Hi mate!'
+          example: Hi mate!
         sender:
           type: integer
           description: sender's id
@@ -461,35 +459,38 @@ components:
           example: 2
         media:
           type: string
-          format: binary
           description: Attachment
-
+          format: binary
+      example:
+        sender: 1
+        recipient: 2
+        text: Hi mate!
+        media: ""
     MessageState:
       required:
-        - message_id
-        - attribute
-        - value
+      - attribute
+      - message_id
+      - value
       type: object
       properties:
         message_id:
           type: integer
           description: message id
-          example: 1
           format: int64
+          example: 1
         attribute:
           type: string
           description: message attribute
-          example: 'is_deleted'
+          example: is_deleted
         value:
           type: boolean
           description: new state
           example: true
-          
     MessageMetadata:
       required:
-        - sender
-        - recipient
-        - media
+      - media
+      - recipient
+      - sender
       type: object
       properties:
         sender:
@@ -504,21 +505,24 @@ components:
           type: boolean
           description: true if the message has an attachment
           example: true
-          
+      example:
+        sender: 1
+        recipient: 2
+        has_media: true
     MessageSave:
       required:
-        - text
-        - sender
-        - recipient
-        - media
-        - delivery_date
-        - is_draft
+      - delivery_date
+      - is_draft
+      - media
+      - recipient
+      - sender
+      - text
       type: object
       properties:
         text:
           type: string
           description: message body
-          example: 'Hi mate!'
+          example: Hi mate!
         sender:
           type: integer
           description: sender's id
@@ -529,27 +533,25 @@ components:
           example: 2
         media:
           type: string
-          format: binary
           description: Attachment
+          format: binary
         delivery_date:
           type: string
           description: when the message will be sent
-          example: '2021-11-21T16:15'
           format: date
         is_draft:
-          type: boolean 
+          type: boolean
           description: states if a message is a draft
           example: true
-          
     DraftSave:
       required:
-        - sender
+      - sender
       type: object
       properties:
         text:
           type: string
           description: message body
-          example: 'Hi mate!'
+          example: Hi mate!
         sender:
           type: integer
           description: sender's id
@@ -560,10 +562,52 @@ components:
           example: 2
         media:
           type: string
-          format: binary
           description: Attachment
+          format: binary
         delivery_date:
           type: string
           description: when the message will be sent
-          example: '2021-11-21T16:15'
           format: date
+    inline_response_200:
+      type: object
+      properties:
+        media:
+          type: string
+          description: Attachment
+          format: binary
+      example:
+        media: ""
+    inline_response_200_1:
+      properties:
+        message_id:
+          type: integer
+          format: int64
+          example: 1
+        firstname:
+          type: string
+          example: mario
+        email:
+          type: string
+          format: email
+          example: mario.rossi@example.org
+        text:
+          type: string
+          example: Hi mate!
+        delivered:
+          type: boolean
+          example: false
+        candelete:
+          type: boolean
+          example: true
+        future:
+          type: boolean
+          example: true
+      example:
+        firstname: mario
+        future: true
+        candelete: true
+        message_id: 1
+        delivered: false
+        text: Hi mate!
+        email: mario.rossi@example.org
+
