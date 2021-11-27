@@ -18,6 +18,20 @@ services:
 
   redis:
     image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
+  celery:
+    container_name: celery
+    build:
+      context: .
+      dockerfile: DockerfileWorker
+    volumes:
+      - .:/code
+    depends_on:
+      - redis
+    links:
+      - redis
 
   mib_messages:
     <<: &mib_messages

@@ -170,20 +170,35 @@ def send_message(body):  # noqa: E501
         except put_message_in_queue.OperationalError as e:
             logger.exception("Send message task raised: ", e)
 
+    return jsonify({"message": "message scheduled"}), 201
+
 
 def update_message_state(body):  # noqa: E501
     """Updates the message state
-
-     # noqa: E501
 
     :param body: Update message state
     :type body: dict | bytes
 
     :rtype: None
     """
-    if connexion.request.is_json:
-        body = MessageState.from_dict(connexion.request.get_json())  # noqa: E501
-    return "do some magic!"
+    put_body = request.get_json()
+    attribute = put_body["attribute"]
+    message_id = put_body["message_id"]
+    state = put_body["state"]
+
+    if attribute not in ["is_draft", "is_read", "is_delivered"]:
+        return jsonify({"message": "cannot update " + str(attribute)}), 400
+
+    msg = Message_Manager.retrieve_by_id(message_id)
+
+    if msg is None:
+        return (
+            jsonify({"message": "message with id: " + str(attribute) + " not found"}),
+            404,
+        )
+
+    Message_Manager.update_message_state(message_id, "attribute", state)
+    return jsonify({"message": "message state updated"}), 200
 
 
 def _valid_string(text):

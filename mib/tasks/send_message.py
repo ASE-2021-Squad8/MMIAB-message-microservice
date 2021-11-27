@@ -1,4 +1,3 @@
-from celery import Celery
 from celery.utils.log import get_logger
 import json
 
@@ -34,7 +33,7 @@ def send_message(json_message):  # pragma: no cover
     try:
         with app.app_context():
             result = Message_Manager.update_message_state(
-                tmp["message_id", "is_delivered", True]
+                tmp["message_id"], "is_delivered", True
             )
             if result:
                 # TODO send notification via celery
