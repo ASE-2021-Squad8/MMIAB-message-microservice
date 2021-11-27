@@ -1,12 +1,14 @@
 from celery.utils.log import get_logger
 import json
 
-from mib import db
+from flask import current_app
+
+from mib import create_celery, db
 from mib.dao.message_manager import Message_Manager
 
 _APP = None
 logger = get_logger(__name__)
-
+celery = create_celery(current_app)
 
 @celery.task
 # Don't include towards coverage as this needs to be tested via its endpoint
