@@ -177,9 +177,9 @@ paths:
       requestBody:
         description: Update draft state
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              $ref: '#/components/schemas/Draft'
+              $ref: '#/components/schemas/DraftSave'
         required: true
       responses:
         "200":
@@ -547,6 +547,7 @@ components:
     DraftSave:
       required:
       - sender
+      - text
       type: object
       properties:
         text:
