@@ -12,4 +12,8 @@ class Message_Manager(Manager):
         Manager.check_none(id=id_)
         return Message.query.get(id_)
 
+    @staticmethod
+    def update_user(message: Message):
+        Manager.update(message=message)
+
     # TODO: add all queries here

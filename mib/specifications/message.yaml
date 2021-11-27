@@ -512,7 +512,6 @@ components:
     MessageSave:
       required:
       - delivery_date
-      - is_draft
       - media
       - recipient
       - sender
@@ -539,10 +538,10 @@ components:
           type: string
           description: when the message will be sent
           format: date
-        is_draft:
-          type: boolean
-          description: states if a message is a draft
-          example: true
+        message_id:
+          type: integer
+          description: Unique Message ID  
+          example: 1
     DraftSave:
       required:
       - sender
