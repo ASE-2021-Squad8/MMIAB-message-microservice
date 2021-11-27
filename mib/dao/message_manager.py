@@ -38,5 +38,10 @@ class Message_Manager(Manager):
 
         return result
 
+    @staticmethod
+    def retrieve_by_user_id(user_id):
+        Manager.check_none(id=user_id)
+        return db.session.query(Message).filter(Message.sender == user_id).all()
+
 
 # TODO: add all queries here
