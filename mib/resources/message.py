@@ -1,3 +1,15 @@
+from flask import request, jsonify
+import requests
+from mib import logger
+from mib.models.message import Message
+from mib.dao.message_manager import Message_Manager
+from mib.tasks import send_message as put_message_in_queue
+import json
+import pytz
+
+USER = "127.0.0.1:5000/api/"
+
+
 def delete_message_lottery_points(message_id):  # noqa: E501
     """Deschedule a message spending points
 
@@ -8,7 +20,7 @@ def delete_message_lottery_points(message_id):  # noqa: E501
 
     :rtype: None
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_all_received_messages_metadata(user_id):  # noqa: E501
@@ -21,7 +33,7 @@ def get_all_received_messages_metadata(user_id):  # noqa: E501
 
     :rtype: List[MessageMetadata]
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_all_sent_messages_metadata(user_id):  # noqa: E501
@@ -34,7 +46,7 @@ def get_all_sent_messages_metadata(user_id):  # noqa: E501
 
     :rtype: List[MessageMetadata]
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_daily_messages(user_id, day, month, year):  # noqa: E501
@@ -53,7 +65,7 @@ def get_daily_messages(user_id, day, month, year):  # noqa: E501
 
     :rtype: List[InlineResponse2001]
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_message_attachment(message_id):  # noqa: E501
@@ -66,7 +78,7 @@ def get_message_attachment(message_id):  # noqa: E501
 
     :rtype: InlineResponse200
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_message_by_id(message_id):  # noqa: E501
@@ -79,7 +91,7 @@ def get_message_by_id(message_id):  # noqa: E501
 
     :rtype: Message
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_unsent_messages():  # noqa: E501
@@ -90,7 +102,7 @@ def get_unsent_messages():  # noqa: E501
 
     :rtype: List[MessageMetadata]
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def send_message(body):  # noqa: E501
@@ -103,9 +115,60 @@ def send_message(body):  # noqa: E501
 
     :rtype: None
     """
-    if connexion.request.is_json:
-        body = MessageSave.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+    post_data = request.get_json()
+    delivery_date = post_data.get("delivery_date")
+    # expect it populated only when I have to send a draft
+    message_id = post_data.get("message_id")
+    media = post_data.get("media")
+    recipient = post_data.get("recipient")
+    sender = post_data.get("sender")
+    text = post_data.get("text")
+
+    valid_users = False
+    email_r = None
+    email_s = None
+    id = None
+    response = requests.get(USER + "user/" + str(sender))
+    if response.status_code == 200:
+        email_s = response.get_json()["email"]
+        response = requests.get(USER + "user/" + str(recipient))
+        if response.status_code == 200:
+            email_r = response.get_json()["email"]
+            valid_users = True
+
+    if not valid_users:
+        return jsonify({"message": "user not found"}), 404
+
+    msg = Message()
+    msg.delivery_date = delivery_date
+    msg.is_draft = False
+    msg.recipient = recipient
+    msg.sender = sender
+    msg.media = media
+    msg.text = text
+    if message_id is not None and message_id > 0:  # I have to sent a draft
+        msg.message_id = message_id
+        id = Message_Manager.update(msg)
+    else:
+        id = Message_Manager.create(msg)
+
+        # send message via celery
+        try:
+            put_message_in_queue.apply_async(
+                args=[
+                    json.dumps(
+                        {
+                            "id": id,
+                            "body": "You have just received a massage",
+                            "recipient": email_r,
+                            "sender": email_s,
+                        }
+                    )
+                ],  #  convert to utc
+                eta=delivery_date.astimezone(pytz.utc),  # task execution time
+            )
+        except put_message_in_queue.OperationalError as e:
+            logger.exception("Send message task raised: ", e)
 
 
 def update_message_state(body):  # noqa: E501
@@ -120,4 +183,8 @@ def update_message_state(body):  # noqa: E501
     """
     if connexion.request.is_json:
         body = MessageState.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+    return "do some magic!"
+
+
+def _valid_string(text):
+    return not (text is None or text == "" or text.isspace())
