@@ -22,6 +22,8 @@ paths:
       responses:
         "200":
           description: Message state updated
+        "400":
+          description: Cannot update attribute
         "404":
           description: Message not found
         default:

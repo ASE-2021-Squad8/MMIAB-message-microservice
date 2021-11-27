@@ -10,6 +10,7 @@ from flask_environments import Environments
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 import logging
+from celery import Celery
 
 db = None
 migrate = None
@@ -107,3 +108,13 @@ def register_specifications(_api_app):
             if file.endswith(".yaml") or file.endswith(".yml"):
                 file_path = folder.joinpath(file)
                 _api_app.add_api(file_path)
+
+
+def create_celery(flask_app):
+    # broker's url and storing results
+    BACKEND = BROKER = "redis://localhost:6379"
+
+    celery = Celery(__name__, backend=BACKEND, broker=BROKER)
+    # set timezone
+    celery.conf.timezone = "UTC"
+    return celery
