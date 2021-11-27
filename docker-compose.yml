@@ -42,7 +42,7 @@ services:
     #
     # this service is used to apply migrations on db
     #
-    <<: *mib_users
+    <<: *mib_messages
     command: flask db upgrade
     env_file:
       - env_file
