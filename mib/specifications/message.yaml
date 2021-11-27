@@ -488,7 +488,7 @@ components:
           example: true
     MessageMetadata:
       required:
-      - media
+      - has_media
       - recipient
       - sender
       type: object

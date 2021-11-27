@@ -2,9 +2,9 @@
 # Docker file for Message in a Bottle v1.0
 #
 FROM python:3.9
-LABEL maintainer="<squa_id>_squad"
+LABEL maintainer="<8>_squad"
 LABEL version="1.0"
-LABEL description="Message in a Bottle User Microservice"
+LABEL description="Message in a Bottle Message Microservice"
 
 # creating the environment
 COPY . /app

@@ -16,10 +16,13 @@ services:
     env_file:
       - env_file
 
-  mib_users:
-    <<: &mib_users
+  redis:
+    image: "redis:alpine"
+
+  mib_messages:
+    <<: &mib_messages
       # Building the image
-      image: "mib-users:latest"
+      image: "mib-messages:latest"
       build:
         context: .
         dockerfile: Dockerfile 
@@ -33,6 +36,7 @@ services:
     depends_on:
       - db
       - migrations
+      - redis
 
   migrations:
     #
