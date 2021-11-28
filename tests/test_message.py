@@ -66,8 +66,8 @@ class TestMessages(unittest.TestCase):
         )
         responses.add(
             responses.GET,
-            USER + "user" + "/black_list/" + str(2),
-            json={},
+            USER + "user/" + "black_list/" + str(2),
+            json={"blacklisted": []},
             status=200,
         )
 
@@ -83,16 +83,31 @@ class TestMessages(unittest.TestCase):
         )
         assert reply.status_code == 201
 
-        self.db.session.query(self.message).filter(self.message.sender == 1).update(
-            {"is_delivered": True}
+        # update message state
+        reply = self.client.put(
+            "/api/message",
+            data=json.dumps(
+                {"attribute": "is_delivered", "value": True, "message_id": 1}
+            ),
+            content_type="application/json",
         )
 
+        assert reply.status_code == 200
+        # retrieve received message
         reply = self.client.get(f"/api/message/{2}/received/metadata")
 
         assert reply.status_code == 200
 
         json_data = reply.get_json()
 
+        # expect one message
         assert len(json_data) == 1
 
-        # get message by id
+        # retrieve the message content
+        reply = self.client.get(f"/api/message/{1}")
+
+        assert reply.status_code == 200
+
+        json_data = reply.get_json()
+        # check the content
+        assert json_data["text"] == "Hello hello fantastic"
