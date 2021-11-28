@@ -1,7 +1,7 @@
 import unittest
 import json
 import base64
-import io
+
 from datetime import datetime
 
 class TestDrafts(unittest.TestCase):

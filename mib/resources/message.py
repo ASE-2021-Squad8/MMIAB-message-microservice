@@ -7,9 +7,9 @@ from mib.tasks import send_message as put_message_in_queue
 import json
 import pytz
 import json
-import datetime
+from datetime import datetime
 
-USER = "127.0.0.1:5000/api/"
+USER = "http://127.0.0.1:5000/api/"
 
 
 def delete_message_lottery_points(message_id):  # noqa: E501
@@ -178,17 +178,17 @@ def send_message(body):  # noqa: E501
     id = None
     response = requests.get(USER + "user/" + str(sender))
     if response.status_code == 200:
-        email_s = response.get_json()["email"]
+        email_s = response.json()["email"]
         response = requests.get(USER + "user/" + str(recipient))
         if response.status_code == 200:
-            email_r = response.get_json()["email"]
+            email_r = response.json()["email"]
             valid_users = True
 
     if not valid_users:
         return jsonify({"message": "user not found"}), 404
 
     msg = Message()
-    msg.delivery_date = delivery_date
+    msg.delivery_date =  datetime.strptime(delivery_date, "%m/%d/%Y, %H:%M:%S")
     msg.is_draft = False
     msg.recipient = recipient
     msg.sender = sender
@@ -198,7 +198,7 @@ def send_message(body):  # noqa: E501
         msg.message_id = message_id
         id = Message_Manager.update(msg)
     else:
-        id = Message_Manager.create(msg)
+        id = Message_Manager.create_message(msg)
 
         # send message via celery
         try:
@@ -215,8 +215,8 @@ def send_message(body):  # noqa: E501
                 ],  #  convert to utc
                 eta=delivery_date.astimezone(pytz.utc),  # task execution time
             )
-        except put_message_in_queue.OperationalError as e:
-            logger.exception("Send message task raised: ", e)
+        except Exception as e:
+            logger.exception("Send message task raised!")
 
     return jsonify({"message": "message scheduled"}), 201
 
