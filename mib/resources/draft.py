@@ -1,6 +1,5 @@
 from flask import jsonify, abort
 from mib.dao.message_manager import Message_Manager
-from mib.models import Message
 import connexion
 
 def delete_draft(draft_id):  # noqa: E501
