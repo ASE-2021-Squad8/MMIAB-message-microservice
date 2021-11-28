@@ -69,7 +69,7 @@ def get_all_received_messages_metadata(user_id):  # noqa: E501
     messages_list = []
     for msg in tmp_list:
         if msg.sender not in black_list:
-            messages_list.add(msg)
+            messages_list.append(msg)
 
     body = _build_metadata_list(messages_list)
 
@@ -167,7 +167,7 @@ def send_message(body):  # noqa: E501
     delivery_date = post_data.get("delivery_date")
     # expect it populated only when I have to send a draft
     message_id = post_data.get("message_id")
-    media = post_data.get("media")
+    media = bytearray(post_data.get("media"), "utf-8")
     recipient = post_data.get("recipient")
     sender = post_data.get("sender")
     text = post_data.get("text")
@@ -254,11 +254,15 @@ def _valid_string(text):
 
 
 def _build_metadata_list(messages):
-    body = ""
+    body = []
+    d = {}
     for msg in messages:
-        body.add({"recipient": msg.recipient})
-        body.add({"sender": msg.sender})
-        body.add({"has_media": msg.media != None})
+        d.update("recipient", msg.recipient)
+        d.update("sender", msg.sender)
+        d.update("has_media", msg.media is not None and len(msg.media) > 0)
+        d.update("id", msg.id)
+        body.append(d)
+
     return body
 
 

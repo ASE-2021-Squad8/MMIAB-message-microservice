@@ -10,7 +10,6 @@ class Message(db.Model):
         "sender",
         "recipient",
         "delivery_date",
-        "media",
         "is_draft",
         "is_deleted",
         "is_read",
