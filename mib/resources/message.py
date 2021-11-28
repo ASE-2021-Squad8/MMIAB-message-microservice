@@ -3,7 +3,7 @@ import requests
 from mib import logger
 from mib.models.message import Message
 from mib.dao.message_manager import Message_Manager
-from mib.tasks import send_message as put_message_in_queue
+from mib.tasks.send_message import send_message as put_message_in_queue
 import json
 import pytz
 import json
@@ -188,7 +188,7 @@ def send_message(body):  # noqa: E501
         return jsonify({"message": "user not found"}), 404
 
     msg = Message()
-    msg.delivery_date =  datetime.strptime(delivery_date, "%m/%d/%Y, %H:%M:%S")
+    msg.delivery_date = datetime.strptime(delivery_date, "%m/%d/%Y, %H:%M:%S")
     msg.is_draft = False
     msg.recipient = recipient
     msg.sender = sender

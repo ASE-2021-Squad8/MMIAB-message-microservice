@@ -8,18 +8,24 @@ from unittest import mock
 
 USER = "http://127.0.0.1:5000/api/"
 
+
 class TestMessages(unittest.TestCase):
     def setUp(self):
         from mib import create_app
+
         self.app = create_app()
         self.client = self.app.test_client()
         self._ctx = self.app.test_request_context()
         self._ctx.push()
         from mib.dao.message_manager import Message_Manager
         from mib.models.message import Message
+        from mib import db
+
         self.message_manager = Message_Manager
         self.message = Message
+        self.db = db
 
+    """
     def test_delete_message(self):
         # inserting a test message in the db that must be deleted to test
         # the functionality of delete message
@@ -42,22 +48,51 @@ class TestMessages(unittest.TestCase):
         reply = self.client.delete("/api/message/-1")
         data = reply.get_json()
         assert reply.status_code == 404
+    """
 
     @responses.activate
     def test_save_message(self):
-        responses.add(responses.GET, USER + "user/" + str(1),
-                  json={'email': 'sender@example.com', 'points': 60}, status=200)
-        responses.add(responses.GET, USER + "user/" + str(2),
-                  json={'email': 'recipient@example.com', 'points': 50}, status=200)
+        responses.add(
+            responses.GET,
+            USER + "user/" + str(1),
+            json={"email": "sender@example.com", "points": 60},
+            status=200,
+        )
+        responses.add(
+            responses.GET,
+            USER + "user/" + str(2),
+            json={"email": "recipient@example.com", "points": 50},
+            status=200,
+        )
+        responses.add(
+            responses.GET,
+            USER + "user" + "/black_list/" + str(2),
+            json={},
+            status=200,
+        )
 
         message = dict(
             sender=1,
             recipient=2,
             text="Hello hello fantastic",
             media="",
-            delivery_date=datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S")
+            delivery_date=datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S"),
         )
-        reply = self.client.post("/api/message", data=json.dumps(message), content_type="application/json")
+        reply = self.client.post(
+            "/api/message", data=json.dumps(message), content_type="application/json"
+        )
         assert reply.status_code == 201
 
+        self.db.session.query(self.message).filter(self.message.sender == 1).update(
+            {"is_delivered": True}
+        )
 
+        reply = self.client.get(f"/api/message/{2}/received/metadata")
+
+        assert reply.status_code == 200
+
+        json_data = reply.get_json()
+
+        assert len(json_data) == 1
+
+        # get message by id
