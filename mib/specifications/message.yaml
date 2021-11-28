@@ -387,7 +387,6 @@ components:
       - is_delivered
       - is_draft
       - is_read
-      - media
       - recipient
       - sender
       - text
@@ -405,10 +404,6 @@ components:
           type: integer
           description: recipient's id
           example: 2
-        media:
-          type: string
-          description: Attachment
-          format: binary
         delivery_date:
           type: string
           description: when the message will be sent
@@ -490,11 +485,15 @@ components:
           example: true
     MessageMetadata:
       required:
+      - id
       - has_media
       - recipient
       - sender
       type: object
       properties:
+        id:
+          type: integer
+          description: message id
         sender:
           type: integer
           description: sender's id

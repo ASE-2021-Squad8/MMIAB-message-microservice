@@ -1,5 +1,9 @@
 from flask import jsonify, abort
 from mib.dao.message_manager import Message_Manager
+from mib.models.message import Message
+from datetime import datetime
+
+import base64
 import connexion
 
 def delete_draft(draft_id):  # noqa: E501
@@ -13,7 +17,7 @@ def delete_draft(draft_id):  # noqa: E501
 
     message = Message_Manager.retrieve_by_id(draft_id)
     if message is not None and message.is_draft:
-        Message_Manager.delete(message)
+        Message_Manager.delete(_=message)
     else:
         return jsonify({"message": "draft not found"}), 404
 
@@ -36,6 +40,7 @@ def get_all_user_drafts(user_id):  # noqa: E501
     for message in messages:
         result.append(
             {
+                "id": message.message_id,
                 "sender": message.sender,
                 "recipient": message.recipient,
                 "has_media": message.media is not None and len(message.media) > 0,
@@ -60,7 +65,7 @@ def get_draft_by_id(draft_id):  # noqa: E501
     if message is None or not message.is_draft:
         return jsonify({"message": "draft not found"}), 404
 
-    draft = {"sender": message.sender, "recipient": message.recipient, "text": message.text, "media": message.media}    
+    draft = {"sender": message.sender, "recipient": message.recipient, "text": message.text, "media": message.media.decode("utf-8")}    
 
     return jsonify(draft)
 
@@ -83,13 +88,13 @@ def save_draft(body):  # noqa: E501
             draft.recipient = body["recipient"]
         
         if "media" in body and body["media"] != "":
-            draft.media = body["media"]
+            draft.media = bytearray(body["media"], "utf-8")
         
         if "delivery_date" in body and body["delivery_date"] != "":
-            draft.delivery_date = body["delivery_date"]
+            draft.delivery_date = datetime.strptime(body["delivery_date"], "%m/%d/%Y, %H:%M:%S")
 
         Message_Manager.create_message(draft)
-    else:
+    else: #pragma: no cover
         abort(400)
 
     return jsonify({"message": "success"})
