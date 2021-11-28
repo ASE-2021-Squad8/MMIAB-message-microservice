@@ -45,6 +45,7 @@ class Message_Manager(Manager):
         Manager.check_none(id=user_id)
         return db.session.query(Message).filter(Message.sender == user_id).all()
 
+    @staticmethod
     def get_all_sent_messages_metadata(user_id):  # noqa: E501
         return (
             db.session.query(Message)
