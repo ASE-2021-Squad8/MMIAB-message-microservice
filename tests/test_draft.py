@@ -40,6 +40,29 @@ class TestDrafts(unittest.TestCase):
         assert data[0]["has_media"]
 
         draft_id = data[0]["id"]
+
+        # Update a draft
+        data = {"text": "Lorem ipsum dolor...", "sender": 1, "recipient": 1337}
+        data["delivery_date"] = datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S")
+        data["media"] = base64.b64encode(b"Fantastic picture!").decode("utf-8")
+        reply = self.client.put(
+            f"/api/message/draft/{draft_id}",
+            data=json.dumps(data),
+            content_type="application/json",
+        )
+        assert reply.status_code == 200
+
+        # Update a non-existing draft
+        data = {"text": "Lorem ipsum dolor...", "sender": 1, "recipient": 1337}
+        data["delivery_date"] = datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S")
+        data["media"] = base64.b64encode(b"Fantastic picture!").decode("utf-8")
+        reply = self.client.put(
+            f"/api/message/draft/{1337}",
+            data=json.dumps(data),
+            content_type="application/json",
+        )
+        assert reply.status_code == 404
+
         reply = self.client.get(f"/api/message/draft/{draft_id}")
         data = reply.get_json()   
         assert reply.status_code == 200

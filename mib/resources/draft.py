@@ -110,8 +110,8 @@ def update_draft(draft_id, body):  # noqa: E501
     """
     if connexion.request.is_json:
         draft = Message_Manager.retrieve_by_id(draft_id)
-        if not draft.is_draft:
-            jsonify({"message": "not a draft"}), 400
+        if draft is None or not draft.is_draft:
+            return jsonify({"message": "draft not found"}), 404
 
         body = connexion.request.get_json()
         draft.text = body["text"]
@@ -121,13 +121,13 @@ def update_draft(draft_id, body):  # noqa: E501
             draft.recipient = body["recipient"]
         
         if "media" in body and body["media"] != "":
-            draft.media = body["media"]
+            draft.media = bytearray(body["media"], "utf-8")
         
         if "delivery_date" in body and body["delivery_date"] != "":
-            draft.delivery_date = body["delivery_date"]
+            draft.delivery_date = datetime.strptime(body["delivery_date"], "%m/%d/%Y, %H:%M:%S")
 
         Message_Manager.create_message(draft)
-    else:
+    else: #pragma: no cover
         abort(400)
 
     return jsonify({"message": "success"})
