@@ -20,7 +20,16 @@ services:
     image: "redis:alpine"
     ports:
       - "6379:6379"
-
+  worker:
+    image: "worker:lasest"
+    build:
+      context: . 
+      dockerfile: DockerfileCelery
+    command: [celery, -A,mib.background, worker, -l, INFO ]
+    depends_on:
+      - redis
+      - mib_messages
+    
   mib_messages:
     <<: &mib_messages
       # Building the image
