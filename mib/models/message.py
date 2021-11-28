@@ -5,7 +5,17 @@ import datetime
 class Message(db.Model):
     """Final message object, used for initial delivery, drafts, composition"""
 
-    SERIALIZE_LIST = {"message_id", "text", "sender", "recipient", "delivery_date"}
+    SERIALIZE_LIST = {
+        "text",
+        "sender",
+        "recipient",
+        "delivery_date",
+        "media",
+        "is_draft",
+        "is_deleted",
+        "is_read",
+        "is_delivered",
+    }
     message_id: int
     text: str
     sender: int

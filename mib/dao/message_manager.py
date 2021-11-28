@@ -1,6 +1,8 @@
+from flask.globals import request
 from mib.dao.manager import Manager
 from mib.models.message import Message
 from mib import db, logger
+import datetime
 
 
 class Message_Manager(Manager):
@@ -43,5 +45,36 @@ class Message_Manager(Manager):
         Manager.check_none(id=user_id)
         return db.session.query(Message).filter(Message.sender == user_id).all()
 
+    @staticmethod
+    def get_all_sent_messages_metadata(user_id):  # noqa: E501
+        return (
+            db.session.query(Message)
+            .filter(
+                Message.sender == user_id,
+                Message.is_draft == False,
+                Message.is_delivered == True,
+            )
+            .all()
+        )
 
-# TODO: add all queries here
+    @staticmethod
+    def get_all_received_messages_metadata(user_id):
+        return (
+            db.session.query(Message)
+            .filter(
+                Message.recipient == user_id,
+                Message.is_draft == False,
+                Message.is_delivered == True,
+            )
+            .all()
+        )
+
+    @staticmethod
+    def get_unsent_messages():
+        return (
+            db.session.query(Message)
+            .filter(Message.is_delivered == False)
+            .filter(Message.delivery_date < datetime.now())
+            .filter(Message.is_draft == 0)
+            .all()
+        )

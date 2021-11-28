@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, abort
 import requests
 from mib import logger
 from mib.models.message import Message
@@ -6,6 +6,8 @@ from mib.dao.message_manager import Message_Manager
 from mib.tasks import send_message as put_message_in_queue
 import json
 import pytz
+import json
+import datetime
 
 USER = "127.0.0.1:5000/api/"
 
@@ -20,7 +22,30 @@ def delete_message_lottery_points(message_id):  # noqa: E501
 
     :rtype: None
     """
-    return "do some magic!"
+    message = Message_Manager.retrieve_by_id(message_id)
+    if message is None:
+        abort(404, jsonify({"message": "message not found"}))
+
+    if message.delivery_data < datetime.now():
+        abort(400, jsonify({"message": "message already sent"}))
+
+    sender = _check_user(message.sender)
+
+    if sender["points"] < 60:
+        abort(401, jsonify({"message": "Not enough points"}))
+
+    header = {"Content-type": "application/json"}
+    response = requests.put(
+        USER + "/points/" + str(sender),
+        data=json.dumps({"points": sender["points"] - 60}),
+        headers=header,
+    )
+
+    if response.status_code != 200:
+        abort(500, jsonify({"message": "an error occurred"}))
+
+    Message_Manager.delete(message)
+    return jsonify({"message": "message deleted"}), 200
 
 
 def get_all_received_messages_metadata(user_id):  # noqa: E501
@@ -33,20 +58,39 @@ def get_all_received_messages_metadata(user_id):  # noqa: E501
 
     :rtype: List[MessageMetadata]
     """
-    return "do some magic!"
+
+    _check_user(user_id)
+    response = requests.get(USER + "user" + "/black_list/" + str(user_id))
+
+    json_response = json.load(response.get_json())
+    black_list = [obj["id"] for obj in json_response["blacklisted"]]
+
+    tmp_list = Message_Manager.get_all_received_messages_metadata(user_id)
+    messages_list = []
+    for msg in tmp_list:
+        if msg.sender not in black_list:
+            messages_list.add(msg)
+
+    body = _build_metadata_list(messages_list)
+
+    return jsonify(body), 200
 
 
 def get_all_sent_messages_metadata(user_id):  # noqa: E501
     """Get all sent messages metadata of an user
 
-     # noqa: E501
 
     :param user_id: User Unique ID
     :type user_id: int
 
     :rtype: List[MessageMetadata]
     """
-    return "do some magic!"
+    _check_user(user_id)
+
+    messages_list = Message_Manager.get_all_sent_messages_metadata(user_id=user_id)
+
+    body = _build_metadata_list(messages_list)
+    return jsonify(body), 200
 
 
 def get_daily_messages(user_id, day, month, year):  # noqa: E501
@@ -91,7 +135,10 @@ def get_message_by_id(message_id):  # noqa: E501
 
     :rtype: Message
     """
-    return "do some magic!"
+    message = Message_Manager.retrieve_by_id(message_id)
+    if message is None:
+        abort(404, jsonify({"message": "messaga not found"}))
+    return jsonify(message.serialize())
 
 
 def get_unsent_messages():  # noqa: E501
@@ -102,7 +149,8 @@ def get_unsent_messages():  # noqa: E501
 
     :rtype: List[MessageMetadata]
     """
-    return "do some magic!"
+    messages = Message_Manager.get_unsent_messages()
+    return jsonify(_build_metadata_list(messages)), 200
 
 
 def send_message(body):  # noqa: E501
@@ -203,3 +251,21 @@ def update_message_state(body):  # noqa: E501
 
 def _valid_string(text):
     return not (text is None or text == "" or text.isspace())
+
+
+def _build_metadata_list(messages):
+    body = ""
+    for msg in messages:
+        body.add({"recipient": msg.recipient})
+        body.add({"sender": msg.sender})
+        body.add({"has_media": msg.media != None})
+    return body
+
+
+def _check_user(user_id):
+    response = requests.get(USER + "user/" + str(user_id))
+
+    if response != 200:
+        abort(404, jsonify({"message": "user not found"}))
+
+    return json.load(response.get_json())
