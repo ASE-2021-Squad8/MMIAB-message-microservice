@@ -105,7 +105,7 @@ def save_draft(body):  # noqa: E501
 
         Message_Manager.create_message(draft)
     else:  # pragma: no cover
-        abort(400)
+        return jsonify({"message": "endpoint requires json arguments"}), 400
 
     return jsonify({"message": "success"})
 

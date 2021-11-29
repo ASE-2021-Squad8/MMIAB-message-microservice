@@ -100,9 +100,13 @@ def get_message_attachment(message_id):  # noqa: E501
     :param message_id: Message Unique ID
     :type message_id: int
 
-    :rtype: InlineResponse200
+    :rtype: JSON
     """
-    return "do some magic!"
+    message = Message_Manager.retrieve_by_id(message_id)
+    if message is None:
+        return jsonify({"message": "message not found"}), 404
+
+    return jsonify({"media": message.media.decode("utf-8")})
 
 
 def get_message_by_id(message_id):  # noqa: E501
@@ -118,6 +122,7 @@ def get_message_by_id(message_id):  # noqa: E501
     message = Message_Manager.retrieve_by_id(message_id)
     if message is None:
         abort(jsonify({"message": "message not found"}), 404)
+
     return jsonify(message.serialize())
 
 
@@ -239,6 +244,8 @@ def get_messages_for_day(user_id, year, month, day):
     :param day: day
     :type day: int
     """
+
+    _check_user(user_id)
 
     specified_date = datetime.strptime(f"{month}/{day}/{year}, 00:00:00", "%m/%d/%Y, %H:%M:%S")
     end_date = datetime.strptime(f"{month}/{day}/{year}, 23:59:59", "%m/%d/%Y, %H:%M:%S")

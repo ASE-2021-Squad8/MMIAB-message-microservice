@@ -73,7 +73,7 @@ class TestMessages(unittest.TestCase):
             sender=1,
             recipient=2,
             text="Hello hello fantastic",
-            media="",
+            media=base64.b64encode(b"Fantastic picture!").decode("utf-8"),
             delivery_date=datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S"),
         )
         reply = self.client.post(
@@ -89,29 +89,35 @@ class TestMessages(unittest.TestCase):
             ),
             content_type="application/json",
         )
-
         assert reply.status_code == 200
+
         # retrieve received message
         reply = self.client.get(f"/api/message/{2}/received/metadata")
-
         assert reply.status_code == 200
-
         json_data = reply.get_json()
-
         # expect one message
         assert len(json_data) == 1
+        assert json_data[0]["has_media"]
 
         # retrieve the message content
         reply = self.client.get(f"/api/message/{1}")
-
-        assert reply.status_code == 200
-
         json_data = reply.get_json()
-        # check the content
+        assert reply.status_code == 200
         assert json_data["text"] == "Hello hello fantastic"
 
         # check there's a message sent with that delivery date
         reply = self.client.get(f"/api/message/{1}/sent/{2222}/{1}/{1}")
         json_data = reply.get_json()
         assert len(json_data) == 1
+
+        # retrieve the message attachment
+        reply = self.client.get(f"/api/message/{1}/attachment")
+        json_data = reply.get_json()
+        assert reply.status_code == 200
+        assert (
+            base64.b64decode(bytearray(json_data["media"], "utf-8")) == b"Fantastic picture!"
+        )
+
+        reply = self.client.get(f"/api/message/{1337}/attachment")
+        assert reply.status_code == 404
 
