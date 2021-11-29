@@ -69,7 +69,7 @@ def get_draft_by_id(draft_id):  # noqa: E501
         "sender": message.sender,
         "recipient": message.recipient,
         "text": message.text,
-        "media": message.media.decode("utf-8"),
+        "media": message.media.decode("utf-8") if message.media is not None else "",
     }
 
     return jsonify(draft)
