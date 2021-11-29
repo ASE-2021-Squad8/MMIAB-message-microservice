@@ -109,3 +109,9 @@ class TestMessages(unittest.TestCase):
         json_data = reply.get_json()
         # check the content
         assert json_data["text"] == "Hello hello fantastic"
+
+        # check there's a message sent with that delivery date
+        reply = self.client.get(f"/api/message/{1}/sent/{2222}/{1}/{1}")
+        json_data = reply.get_json()
+        assert len(json_data) == 1
+

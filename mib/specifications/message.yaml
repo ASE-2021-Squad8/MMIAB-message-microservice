@@ -233,12 +233,12 @@ paths:
                 $ref: '#/components/schemas/inline_response_200'
         "404":
           description: Message not found
-  /message/{user_id}/sent/{day}/{month}/{year}:
+  /message/{user_id}/sent/{year}/{month}/{day}:
     get:
       tags:
       - Message
-      summary: Gets all messages sent in a time interval (includes yet to be delivered)
-      operationId: mib.resources.message.get_daily_messages
+      summary: Gets all messages sent in a specific day (includes yet to be delivered)
+      operationId: mib.resources.message.get_messages_for_day
       parameters:
       - name: user_id
         in: path

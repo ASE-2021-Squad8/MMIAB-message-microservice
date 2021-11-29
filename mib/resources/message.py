@@ -92,25 +92,6 @@ def get_all_sent_messages_metadata(user_id):  # noqa: E501
     return jsonify(body), 200
 
 
-def get_daily_messages(user_id, day, month, year):  # noqa: E501
-    """Gets all messages sent in a time interval (includes yet to be delivered)
-
-     # noqa: E501
-
-    :param user_id: User Unique ID
-    :type user_id: int
-    :param day: day
-    :type day: int
-    :param month: month
-    :type month: int
-    :param year: year
-    :type year: int
-
-    :rtype: List[InlineResponse2001]
-    """
-    return "do some magic!"
-
-
 def get_message_attachment(message_id):  # noqa: E501
     """Retrieves an attachment for a message
 
@@ -247,6 +228,25 @@ def update_message_state(body):  # noqa: E501
 
     Message_Manager.update_message_state(message_id, attribute, state)
     return jsonify({"message": "message state updated"}), 200
+
+def get_messages_for_day(user_id, year, month, day): 
+    """Returns messages sent in a specific day
+
+    :param year: year
+    :type year: int
+    :param month: month
+    :type month: int
+    :param day: day
+    :type day: int
+    """
+
+    specified_date = datetime.strptime(f"{month}/{day}/{year}, 00:00:00", "%m/%d/%Y, %H:%M:%S")
+    end_date = datetime.strptime(f"{month}/{day}/{year}, 23:59:59", "%m/%d/%Y, %H:%M:%S")
+
+    messages = Message_Manager.retrieve_by_user_id(user_id)
+    messages = filter(lambda x: x.delivery_date >= specified_date and x.delivery_date <= end_date, messages)
+
+    return jsonify(list(map(lambda x: x.serialize(), messages)))
 
 
 def _valid_string(text):
