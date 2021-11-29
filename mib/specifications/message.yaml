@@ -377,6 +377,41 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/MessageMetadata'
+  
+  /message/received/{message_id}/{user_id}:
+    delete:
+      tags:
+      - Message
+      summary: Delete a receiver message
+      operationId: mib.resources.message.delete_received_message
+      parameters:
+       - name: user_id
+         in: path
+         description: User Unique ID
+         required: true
+         style: simple
+         explode: false
+         schema:
+           type: integer
+           format: int64
+       - name: message_id
+         in: path
+         description: User Unique ID
+         required: true
+         style: simple
+         explode: false
+         schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Return all message that should have been sent
+        "404":
+          description: User not found
+        "400":
+          description: Wrong message id
+
+      
 
 components:
   schemas:

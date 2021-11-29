@@ -24,27 +24,25 @@ def delete_message_lottery_points(message_id):  # noqa: E501
     """
     message = Message_Manager.retrieve_by_id(message_id)
     if message is None:
-        abort(jsonify({"message": "message not found"}), 404)
+        return jsonify({"message": "message not found"}), 404
 
-    if message.delivery_data < datetime.now():
-        abort(jsonify({"message": "message already sent"}), 404)
+    if message.delivery_date < datetime.now():
+        return jsonify({"message": "message already sent"}), 404
 
     sender = _check_user(message.sender)
 
     if sender["points"] < 60:
         abort(jsonify({"message": "no enough points"}), 400)
 
-    header = {"Content-type": "application/json"}
     response = requests.put(
-        USER + "/points/" + str(sender),
-        data=json.dumps({"points": sender["points"] - 60}),
-        headers=header,
+        USER + "user/points/" + str(message.sender),
+        json={"points": sender["points"] - 60},
     )
 
     if response.status_code != 200:
-        abort(jsonify({"message": "an error occured"}), 500)
+        return jsonify({"message": "an error occured"}), 500
 
-    Message_Manager.delete(message)
+    Message_Manager.delete(msg=message)
     return jsonify({"message": "message deleted"}), 200
 
 
@@ -121,7 +119,7 @@ def get_message_by_id(message_id):  # noqa: E501
     """
     message = Message_Manager.retrieve_by_id(message_id)
     if message is None:
-        abort(jsonify({"message": "message not found"}), 404)
+        return jsonify({"message": "message not found"}), 404
 
     return jsonify(message.serialize())
 
@@ -234,7 +232,8 @@ def update_message_state(body):  # noqa: E501
     Message_Manager.update_message_state(message_id, attribute, state)
     return jsonify({"message": "message state updated"}), 200
 
-def get_messages_for_day(user_id, year, month, day): 
+
+def get_messages_for_day(user_id, year, month, day):
     """Returns messages sent in a specific day
 
     :param year: year
@@ -247,13 +246,30 @@ def get_messages_for_day(user_id, year, month, day):
 
     _check_user(user_id)
 
-    specified_date = datetime.strptime(f"{month}/{day}/{year}, 00:00:00", "%m/%d/%Y, %H:%M:%S")
-    end_date = datetime.strptime(f"{month}/{day}/{year}, 23:59:59", "%m/%d/%Y, %H:%M:%S")
+    specified_date = datetime.strptime(
+        f"{month}/{day}/{year}, 00:00:00", "%m/%d/%Y, %H:%M:%S"
+    )
+    end_date = datetime.strptime(
+        f"{month}/{day}/{year}, 23:59:59", "%m/%d/%Y, %H:%M:%S"
+    )
 
     messages = Message_Manager.retrieve_by_user_id(user_id)
-    messages = filter(lambda x: x.delivery_date >= specified_date and x.delivery_date <= end_date, messages)
+    messages = filter(
+        lambda x: x.delivery_date >= specified_date and x.delivery_date <= end_date,
+        messages,
+    )
 
     return jsonify(list(map(lambda x: x.serialize(), messages)))
+
+
+def delete_received_message(message_id, user_id):
+    _check_user(user_id)
+    message = Message_Manager.retrieve_by_id(message_id)
+    if message is None or message.recipient != user_id:
+        return jsonify({"message": "Wrong received message id"}), 400
+
+    Message_Manager.delete(msg=message)
+    return jsonify({"message": "Received message has beed deleted"}), 200
 
 
 def _valid_string(text):
