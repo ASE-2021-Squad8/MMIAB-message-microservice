@@ -4,20 +4,27 @@ import base64
 
 from datetime import datetime
 
+
 class TestDrafts(unittest.TestCase):
     def setUp(self):
         from mib import create_app
+
         self.app = create_app()
         self.client = self.app.test_client()
         self._ctx = self.app.test_request_context()
         self._ctx.push()
         from mib.dao.message_manager import Message_Manager
+
         self.message_manager = Message_Manager
 
     def test_empty_draft(self):
-        reply = self.client.post("/api/message/draft", data=json.dumps(dict(text="")), content_type="application/json")
+        reply = self.client.post(
+            "/api/message/draft",
+            data=json.dumps(dict(sender=1, text="")),
+            content_type="application/json",
+        )
         assert reply.status_code == 400
-    
+
     def test_insert_delete_draft(self):
         reply = self.client.get("/api/message/0/draft")
         assert reply.status_code == 200
@@ -64,13 +71,15 @@ class TestDrafts(unittest.TestCase):
         assert reply.status_code == 404
 
         reply = self.client.get(f"/api/message/draft/{draft_id}")
-        data = reply.get_json()   
+        data = reply.get_json()
         assert reply.status_code == 200
         assert data["text"] == "Lorem ipsum dolor..."
-        assert base64.b64decode(bytearray(data["media"], "utf-8")) == b"Fantastic picture!"
+        assert (
+            base64.b64decode(bytearray(data["media"], "utf-8")) == b"Fantastic picture!"
+        )
 
         reply = self.client.get(f"/api/message/draft/{1337}")
-        data = reply.get_json()   
+        data = reply.get_json()
         assert reply.status_code == 404
 
         reply = self.client.delete("/api/message/draft/1")

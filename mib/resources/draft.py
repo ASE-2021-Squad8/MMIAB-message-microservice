@@ -3,8 +3,8 @@ from mib.dao.message_manager import Message_Manager
 from mib.models.message import Message
 from datetime import datetime
 
-import base64
 import connexion
+
 
 def delete_draft(draft_id):  # noqa: E501
     """Delete a draft by id
@@ -65,7 +65,12 @@ def get_draft_by_id(draft_id):  # noqa: E501
     if message is None or not message.is_draft:
         return jsonify({"message": "draft not found"}), 404
 
-    draft = {"sender": message.sender, "recipient": message.recipient, "text": message.text, "media": message.media.decode("utf-8")}    
+    draft = {
+        "sender": message.sender,
+        "recipient": message.recipient,
+        "text": message.text,
+        "media": message.media.decode("utf-8"),
+    }
 
     return jsonify(draft)
 
@@ -83,18 +88,20 @@ def save_draft(body):  # noqa: E501
         draft = Message()
         draft.text = body["text"]
         draft.sender = body["sender"]
-        
+
         if "recipient" in body and body["recipient"] != "":
             draft.recipient = body["recipient"]
-        
+
         if "media" in body and body["media"] != "":
             draft.media = bytearray(body["media"], "utf-8")
-        
+
         if "delivery_date" in body and body["delivery_date"] != "":
-            draft.delivery_date = datetime.strptime(body["delivery_date"], "%m/%d/%Y, %H:%M:%S")
+            draft.delivery_date = datetime.strptime(
+                body["delivery_date"], "%m/%d/%Y, %H:%M:%S"
+            )
 
         Message_Manager.create_message(draft)
-    else: #pragma: no cover
+    else:  # pragma: no cover
         abort(400)
 
     return jsonify({"message": "success"})
@@ -116,18 +123,20 @@ def update_draft(draft_id, body):  # noqa: E501
         body = connexion.request.get_json()
         draft.text = body["text"]
         draft.sender = body["sender"]
-        
+
         if "recipient" in body and body["recipient"] != "":
             draft.recipient = body["recipient"]
-        
+
         if "media" in body and body["media"] != "":
             draft.media = bytearray(body["media"], "utf-8")
-        
+
         if "delivery_date" in body and body["delivery_date"] != "":
-            draft.delivery_date = datetime.strptime(body["delivery_date"], "%m/%d/%Y, %H:%M:%S")
+            draft.delivery_date = datetime.strptime(
+                body["delivery_date"], "%m/%d/%Y, %H:%M:%S"
+            )
 
         Message_Manager.create_message(draft)
-    else: #pragma: no cover
+    else:  # pragma: no cover
         abort(400)
 
     return jsonify({"message": "success"})
