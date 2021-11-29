@@ -4,10 +4,6 @@ import base64
 import responses
 
 from datetime import datetime
-from unittest import mock
-
-USER = "http://127.0.0.1:5000/api/"
-
 
 class TestMessages(unittest.TestCase):
     def setUp(self):
@@ -19,11 +15,13 @@ class TestMessages(unittest.TestCase):
         self._ctx.push()
         from mib.dao.message_manager import Message_Manager
         from mib.models.message import Message
+        from mib.resources.message import USER
         from mib import db
 
         self.message_manager = Message_Manager
         self.message = Message
         self.db = db
+        self.user_service_endpoint = USER
 
     """
     def test_delete_message(self):
@@ -54,19 +52,19 @@ class TestMessages(unittest.TestCase):
     def test_save_message(self):
         responses.add(
             responses.GET,
-            USER + "user/" + str(1),
+            self.user_service_endpoint + "user/" + str(1),
             json={"email": "sender@example.com", "points": 60},
             status=200,
         )
         responses.add(
             responses.GET,
-            USER + "user/" + str(2),
+            self.user_service_endpoint + "user/" + str(2),
             json={"email": "recipient@example.com", "points": 50},
             status=200,
         )
         responses.add(
             responses.GET,
-            USER + "user/" + "black_list/" + str(2),
+            self.user_service_endpoint + "user/" + "black_list/" + str(2),
             json={"blacklisted": []},
             status=200,
         )
