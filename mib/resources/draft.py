@@ -85,6 +85,9 @@ def save_draft(body):  # noqa: E501
     """
     if connexion.request.is_json:
         body = connexion.request.get_json()
+        if body["text"] == "" or body["sender"] == "":
+            abort(400)
+
         draft = Message()
         draft.text = body["text"]
         draft.sender = body["sender"]
