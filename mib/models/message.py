@@ -10,7 +10,6 @@ class Message(db.Model):
         "sender",
         "recipient",
         "delivery_date",
-        "media",
         "is_draft",
         "is_deleted",
         "is_read",
@@ -27,7 +26,7 @@ class Message(db.Model):
     is_read: bool
     is_deleted: bool
 
-    __tablename__ = "message"
+    __tablename__ = "Message"
 
     message_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     text = db.Column(db.String())
