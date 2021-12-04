@@ -4,7 +4,8 @@ LABEL version="1.0"
 LABEL description="Message in a Bottle Message Microservice"
 WORKDIR /
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt  
+COPY requirements.prod.txt ./
+RUN pip install --no-cache-dir -r requirements.prod.txt  
 RUN rm requirements.txt  
 
 COPY . /

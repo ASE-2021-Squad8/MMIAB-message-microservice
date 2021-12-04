@@ -25,13 +25,13 @@ services:
     build:
       context: . 
       dockerfile: DockerfileCelery
-    command: [celery, -A, mib.background, worker, -l, INFO]
+    command: [celery, -A, mib.background, worker, -l, DEBUG]
     depends_on:
       - redis
       - mib_messages
     env_file:
       - env_file
-    
+
   mib_messages:
     <<: &mib_messages
       # Building the image
@@ -50,6 +50,19 @@ services:
       - db
       - migrations
       - redis
+
+  migrations:
+    #
+    # this service is used to apply migrations on db
+    #
+    <<: *mib_messages
+    command: flask db upgrade
+    env_file:
+      - env_file
+    environment:
+      - POSTGRES_HOST=db
+    restart: on-failure
+
 
 # Declaring all volumes
 volumes:

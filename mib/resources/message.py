@@ -1,13 +1,14 @@
-from flask import request, jsonify, abort
-import requests
-from mib import logger
-from mib.models.message import Message
-from mib.dao.message_manager import Message_Manager
-from mib.tasks.send_message import send_message as put_message_in_queue
 import json
-import pytz
-import json
+import os
 from datetime import datetime
+
+import pytz
+import requests
+from flask import abort, jsonify, request
+from mib import logger
+from mib.dao.message_manager import Message_Manager
+from mib.models.message import Message
+from mib.tasks.send_message import send_message as put_message_in_queue
 
 USER = "http://127.0.0.1:5000/api/"
 
@@ -159,6 +160,7 @@ def send_message(body):  # noqa: E501
     email_r = None
     email_s = None
     id = None
+    """
     response = requests.get(USER + "user/" + str(sender))
     if response.status_code == 200:
         email_s = response.json()["email"]
@@ -169,7 +171,8 @@ def send_message(body):  # noqa: E501
 
     if not valid_users:
         return jsonify({"message": "user not found"}), 404
-
+"""
+    print("non fatto")
     msg = Message()
     msg.delivery_date = datetime.strptime(delivery_date, "%m/%d/%Y, %H:%M:%S")
     msg.is_draft = False
@@ -182,26 +185,27 @@ def send_message(body):  # noqa: E501
         id = Message_Manager.update(msg)
     else:
         id = Message_Manager.create_message(msg)
-
+    print("fatto")
     # send message via celery
-    """
-    try:
-        put_message_in_queue.apply_async(
-            args=[
-                json.dumps(
-                    {
-                        "id": id,
-                        "body": "You have just received a massage",
-                        "recipient": email_r,
-                        "sender": email_s,
-                    }
-                )
-            ],  #  convert to utc
-            eta=msg.delivery_date.astimezone(pytz.utc),  # task execution time
-        )
-    except Exception as e:
-        logger.exception("Send message task raised!")
-    """
+    if os.getenv("FLASK_ENV") != "testing": #pragma: no cover
+        try:
+            print("AAAAAAAAAA")
+            put_message_in_queue.apply_async(
+                args=[
+                    json.dumps(
+                        {
+                            "id": id,
+                            "body": "You have just received a massage",
+                            "recipient": email_r,
+                            "sender": email_s,
+                        }
+                    )
+                ],  #  convert to utc
+                eta=msg.delivery_date.astimezone(pytz.utc),  # task execution time
+            )
+            print("BBBBBBBBBB")
+        except Exception as e:
+            logger.exception("Send message task raised!")
     return jsonify({"message": "message scheduled"}), 201
 
 

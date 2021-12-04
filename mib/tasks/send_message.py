@@ -1,16 +1,14 @@
 from celery.utils.log import get_logger
 import json
 
-from flask import current_app
+from celery import decorators
 
-from mib import create_celery, db
 from mib.dao.message_manager import Message_Manager
 
 _APP = None
 logger = get_logger(__name__)
-celery = create_celery(current_app)
 
-@celery.task
+@decorators.task(name="mib.tasks.send_message.send_message")
 # Don't include towards coverage as this needs to be tested via its endpoint
 def send_message(json_message):  # pragma: no cover
     """Deliver a message updating is_delivered to 1
@@ -28,7 +26,6 @@ def send_message(json_message):  # pragma: no cover
         from mib import create_app
 
         app = create_app()
-        db.init_app(app)
     else:
         app = _APP
     # update message state
