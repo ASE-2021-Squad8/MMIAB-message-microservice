@@ -160,7 +160,7 @@ def send_message(body):  # noqa: E501
     email_r = None
     email_s = None
     id = None
-    """
+
     response = requests.get(USER + "user/" + str(sender))
     if response.status_code == 200:
         email_s = response.json()["email"]
@@ -171,9 +171,11 @@ def send_message(body):  # noqa: E501
 
     if not valid_users:
         return jsonify({"message": "user not found"}), 404
-"""
+
+    # timezone
+    t = pytz.timezone("Europe/Rome")
     msg = Message()
-    msg.delivery_date = datetime.strptime(delivery_date, "%m/%d/%Y, %H:%M:%S")
+    msg.delivery_date = t.localize(datetime.fromisoformat(delivery_date))
     msg.is_draft = False
     msg.recipient = recipient
     msg.sender = sender
@@ -184,6 +186,7 @@ def send_message(body):  # noqa: E501
         id = Message_Manager.update(msg)
     else:
         id = Message_Manager.create_message(msg)
+
     # send message via celery
     if os.getenv("FLASK_ENV") != "testing":  # pragma: no cover
         try:

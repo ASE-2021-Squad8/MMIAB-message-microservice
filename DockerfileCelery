@@ -7,6 +7,7 @@ COPY requirements.txt ./
 COPY requirements.prod.txt ./
 RUN pip install --no-cache-dir -r requirements.prod.txt  
 RUN rm requirements.txt  
+ENV TZ UTC
 
 COPY . /
 

@@ -25,7 +25,7 @@ services:
     build:
       context: . 
       dockerfile: DockerfileCelery
-    command: [celery, -A, mib.background, worker, -l, DEBUG]
+    command: [celery, -A, mib.background, worker, -l, INFO]
     depends_on:
       - redis
       - mib_messages

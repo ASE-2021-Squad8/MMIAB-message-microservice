@@ -90,7 +90,7 @@ class TestMessages(unittest.TestCase):
             recipient=2,
             text="Hello hello fantastic",
             media=base64.b64encode(b"Fantastic picture!").decode("utf-8"),
-            delivery_date=datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S"),
+            delivery_date=datetime(2222, 1, 1).isoformat(),
         )
         reply = self.client.post(
             "/api/message", data=json.dumps(message), content_type="application/json"
@@ -191,7 +191,7 @@ class TestMessages(unittest.TestCase):
             recipient=252,
             text="Hello hello fantastic",
             media=base64.b64encode(b"Fantastic picture!").decode("utf-8"),
-            delivery_date=datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S"),
+            delivery_date=datetime(2222, 1, 1).isoformat(),
         )
         reply = self.client.post(
             "/api/message", data=json.dumps(message), content_type="application/json"
@@ -233,7 +233,7 @@ class TestMessages(unittest.TestCase):
             recipient=1,
             text="Hello hello fantastic",
             media=base64.b64encode(b"Fantastic picture!").decode("utf-8"),
-            delivery_date=datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S"),
+            delivery_date=datetime(2222, 1, 1).isoformat(),
         )
 
         reply = self.client.post(
