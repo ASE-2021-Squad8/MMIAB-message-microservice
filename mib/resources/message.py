@@ -194,7 +194,7 @@ def send_message(body):  # noqa: E501
                 args=[
                     json.dumps(
                         {
-                            "id": id,
+                            "message_id": id,
                             "body": "You have just received a massage",
                             "recipient": email_r,
                             "sender": email_s,
