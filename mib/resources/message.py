@@ -10,7 +10,7 @@ from mib.dao.message_manager import Message_Manager
 from mib.models.message import Message
 from mib.tasks.send_message import send_message as put_message_in_queue
 
-USER = "http://127.0.0.1:5000/api/"
+USER_MS = "http://127.0.0.1:5000/api/"
 
 
 def delete_message_lottery_points(message_id):  # noqa: E501
@@ -36,12 +36,12 @@ def delete_message_lottery_points(message_id):  # noqa: E501
         abort(jsonify({"message": "no enough points"}), 400)
 
     response = requests.put(
-        USER + "user/points/" + str(message.sender),
+        USER_MS + "user/points/" + str(message.sender),
         json={"points": sender["points"] - 60},
     )
 
     if response.status_code != 200:
-        return jsonify({"message": "an error occured"}), 500
+        return jsonify({"message": "an error occurred"}), 500
 
     Message_Manager.delete(msg=message)
     return jsonify({"message": "message deleted"}), 200
@@ -58,7 +58,7 @@ def get_all_received_messages_metadata(user_id):  # noqa: E501
     :rtype: List[MessageMetadata]
     """
     _check_user(user_id)
-    response = requests.get(USER + "user" + "/black_list/" + str(user_id))
+    response = requests.get(USER_MS + "user" + "/black_list/" + str(user_id))
 
     json_response = response.json()
     black_list = [obj["id"] for obj in json_response["blacklisted"]]
@@ -161,10 +161,10 @@ def send_message(body):  # noqa: E501
     email_s = None
     id = None
 
-    response = requests.get(USER + "user/" + str(sender))
+    response = requests.get(USER_MS + "user/" + str(sender))
     if response.status_code == 200:
         email_s = response.json()["email"]
-        response = requests.get(USER + "user/" + str(recipient))
+        response = requests.get(USER_MS + "user/" + str(recipient))
         if response.status_code == 200:
             email_r = response.json()["email"]
             valid_users = True
@@ -293,7 +293,7 @@ def _build_metadata_list(messages):
 
 
 def _check_user(user_id):
-    response = requests.get(USER + "user/" + str(user_id))
+    response = requests.get(USER_MS + "user/" + str(user_id))
 
     if response.status_code != 200:
         abort(404, {"message": "user not found"})

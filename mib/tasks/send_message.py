@@ -2,11 +2,16 @@ from celery.utils.log import get_logger
 import json
 
 from celery import decorators
+import requests
 
 from mib.dao.message_manager import Message_Manager
 
+
 _APP = None
 logger = get_logger(__name__)
+SEND_NOTIFICATION_MS = "http://127.0.0.1:5000/api/"
+USER_MS = "http://127.0.0.1:5000/api/"
+
 
 @decorators.task(name="mib.tasks.send_message.send_message")
 # Don't include towards coverage as this needs to be tested via its endpoint
@@ -28,18 +33,35 @@ def send_message(json_message):  # pragma: no cover
         app = create_app()
     else:
         app = _APP
-    # update message state
+    result = False
+
     try:
         with app.app_context():
+            # update message state
             result = Message_Manager.update_message_state(
                 tmp["message_id"], "is_delivered", True
             )
+            # send email
             if result:
-                # TODO send notification via celery
-                logger.info("Ok")
+                email_r = tmp["recipient"]
+                email_s = tmp["sender"]
+                # send notification via email microservice
+                _send_email(email_s, email_r, "You have just received a message!")
 
     except Exception as e:
         logger.exception("save_message raised ", e)
         raise e
     logger.info("End send_message result: " + str(result))
     return result
+
+
+def _send_email(email_s, email_r, body):  # pragma: no cover
+    # send notification via email microservice
+    requests.put(
+        SEND_NOTIFICATION_MS + "email",
+        json={
+            "sender": email_s,
+            "recipient": email_r,
+            "body": body,
+        },
+    )

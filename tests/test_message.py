@@ -16,13 +16,13 @@ class TestMessages(unittest.TestCase):
         self._ctx.push()
         from mib.dao.message_manager import Message_Manager
         from mib.models.message import Message
-        from mib.resources.message import USER
+        from mib.resources.message import USER_MS
         from mib import db
 
         self.message_manager = Message_Manager
         self.message = Message
         self.db = db
-        self.user_service_endpoint = USER
+        self.user_service_endpoint = USER_MS
 
     @responses.activate
     def test_delete_message(self):
