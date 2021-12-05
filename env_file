@@ -1,0 +1,19 @@
+#
+# Flask Configuration
+#
+#------------------------
+FLASK_ENV=production
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/0
+
+#
+# Postgres configuration
+#
+#------------------------
+#
+# POSTGRES_HOST=
+#
+POSTGRES_HOST=db
+POSTGRES_PASSWORD=abcd
+POSTGRES_USER=mib_users_ms
+POSTGRES_DB=mib_users_ms
