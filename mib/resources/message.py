@@ -83,7 +83,7 @@ def get_all_sent_messages_metadata(user_id):  # noqa: E501
 
     :rtype: List[MessageMetadata]
     """
-    _check_user(user_id)
+    # _check_user(user_id)
 
     messages_list = Message_Manager.get_all_sent_messages_metadata(user_id=user_id)
 
@@ -172,7 +172,6 @@ def send_message(body):  # noqa: E501
     if not valid_users:
         return jsonify({"message": "user not found"}), 404
 """
-    print("non fatto")
     msg = Message()
     msg.delivery_date = datetime.strptime(delivery_date, "%m/%d/%Y, %H:%M:%S")
     msg.is_draft = False
@@ -185,11 +184,9 @@ def send_message(body):  # noqa: E501
         id = Message_Manager.update(msg)
     else:
         id = Message_Manager.create_message(msg)
-    print("fatto")
     # send message via celery
     if os.getenv("FLASK_ENV") != "testing":  # pragma: no cover
         try:
-            print("AAAAAAAAAA")
             put_message_in_queue.apply_async(
                 args=[
                     json.dumps(
@@ -203,7 +200,6 @@ def send_message(body):  # noqa: E501
                 ],  #  convert to utc
                 eta=msg.delivery_date.astimezone(pytz.utc),  # task execution time
             )
-            print("BBBBBBBBBB")
         except Exception as e:
             logger.exception("Send message task raised!")
     return jsonify({"message": "message scheduled"}), 201
@@ -282,8 +278,8 @@ def _valid_string(text):
 
 def _build_metadata_list(messages):
     body = []
-    d = {}
     for msg in messages:
+        d = {}
         d.update({"recipient": msg.recipient})
         d.update({"sender": msg.sender})
         d.update({"has_media": msg.media is not None and len(msg.media) > 0})
