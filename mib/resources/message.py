@@ -187,7 +187,7 @@ def send_message(body):  # noqa: E501
         id = Message_Manager.create_message(msg)
     print("fatto")
     # send message via celery
-    if os.getenv("FLASK_ENV") != "testing": #pragma: no cover
+    if os.getenv("FLASK_ENV") != "testing":  # pragma: no cover
         try:
             print("AAAAAAAAAA")
             put_message_in_queue.apply_async(
@@ -297,6 +297,6 @@ def _check_user(user_id):
     response = requests.get(USER + "user/" + str(user_id))
 
     if response.status_code != 200:
-        abort(jsonify({"message": "user not found"}), 404)
+        abort(404, {"message": "user not found"})
 
     return response.json()
