@@ -5,12 +5,12 @@ from datetime import datetime
 import pytz
 import requests
 from flask import abort, jsonify, request
-from mib import logger
+from mib import logger, app
 from mib.dao.message_manager import Message_Manager
 from mib.models.message import Message
 from mib.tasks.send_message import send_message as put_message_in_queue
 
-USER_MS = "http://localhost:10001/api/"
+USER_MS = app.config["USERS_MS_URL"]
 
 
 def delete_message_lottery_points(message_id):  # noqa: E501

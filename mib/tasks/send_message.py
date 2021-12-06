@@ -3,14 +3,15 @@ import json
 
 from celery import decorators
 import requests
+from mib import app 
 
 from mib.dao.message_manager import Message_Manager
 
 
 _APP = None
 logger = get_logger(__name__)
-USER_MS = "http://127.0.0.1:10001/api/"
-SEND_NOTIFICATION_MS = "http://127.0.0.1:10003/api/"
+USER_MS = app.config["USERS_MS_URL"]
+SEND_NOTIFICATION_MS = app.config["NOTIFICATIONS_MS_URL"]
 
 
 @decorators.task(name="mib.tasks.send_message.send_message")
