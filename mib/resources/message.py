@@ -186,12 +186,12 @@ def send_message(body):  # noqa: E501
     msg.sender = sender
     msg.media = media
     msg.text = text
-    id = msg.message_id
 
     if message_id is not None and message_id > 0:  # I have to sent a draft
         Message_Manager.update_message(msg)
+        id = msg.message_id
     else:
-        Message_Manager.create_message(msg)
+        id = Message_Manager.create_message(msg)
 
     # send message via celery
     if os.getenv("FLASK_ENV") != "testing":  # pragma: no cover
