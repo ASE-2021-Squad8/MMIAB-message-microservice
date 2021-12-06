@@ -603,7 +603,6 @@ components:
         delivery_date:
           type: string
           description: when the message will be sent
-          format: date
     inline_response_200:
       type: object
       properties:

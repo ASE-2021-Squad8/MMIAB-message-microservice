@@ -31,7 +31,7 @@ class TestDrafts(unittest.TestCase):
 
         # Save a draft
         data = {"text": "Lorem ipsum dolor...", "sender": 1, "recipient": 69}
-        data["delivery_date"] = datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S")
+        data["delivery_date"] = datetime(2222, 1, 1).strftime("%Y-%m-%dT%H:%M")
         data["media"] = base64.b64encode(b"Fantastic picture!").decode("utf-8")
         reply = self.client.post(
             "/api/message/draft",
@@ -50,7 +50,7 @@ class TestDrafts(unittest.TestCase):
 
         # Update a draft
         data = {"text": "Lorem ipsum dolor...", "sender": 1, "recipient": 1337}
-        data["delivery_date"] = datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S")
+        data["delivery_date"] = datetime(2222, 1, 1).strftime("%Y-%m-%dT%H:%M")
         data["media"] = base64.b64encode(b"Fantastic picture!").decode("utf-8")
         reply = self.client.put(
             f"/api/message/draft/{draft_id}",
@@ -61,7 +61,7 @@ class TestDrafts(unittest.TestCase):
 
         # Update a non-existing draft
         data = {"text": "Lorem ipsum dolor...", "sender": 1, "recipient": 1337}
-        data["delivery_date"] = datetime(2222, 1, 1).strftime("%m/%d/%Y, %H:%M:%S")
+        data["delivery_date"] = datetime(2222, 1, 1).strftime("%Y-%m-%dT%H:%M")
         data["media"] = base64.b64encode(b"Fantastic picture!").decode("utf-8")
         reply = self.client.put(
             f"/api/message/draft/{1337}",

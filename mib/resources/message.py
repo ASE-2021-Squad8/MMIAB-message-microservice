@@ -190,6 +190,7 @@ def send_message(body):  # noqa: E501
     # send message via celery
     if os.getenv("FLASK_ENV") != "testing":  # pragma: no cover
         try:
+            print("QUI")
             put_message_in_queue.apply_async(
                 args=[
                     json.dumps(
@@ -203,6 +204,7 @@ def send_message(body):  # noqa: E501
                 ],  #  convert to utc
                 eta=msg.delivery_date.astimezone(pytz.utc),  # task execution time
             )
+            print("FATTO")
         except Exception as e:
             logger.exception("Send message task raised!")
     return jsonify({"message": "message scheduled"}), 201
@@ -250,10 +252,10 @@ def get_messages_for_day(user_id, year, month, day):
     _check_user(user_id)
 
     specified_date = datetime.strptime(
-        f"{month}/{day}/{year}, 00:00:00", "%m/%d/%Y, %H:%M:%S"
+        f"{year}-{month}-{day}T00:00", "%Y-%m-%dT%H:%M"
     )
     end_date = datetime.strptime(
-        f"{month}/{day}/{year}, 23:59:59", "%m/%d/%Y, %H:%M:%S"
+        f"{year}-{month}-{day}T23:59", "%Y-%m-%dT%H:%M"
     )
 
     messages = Message_Manager.retrieve_by_user_id(user_id)

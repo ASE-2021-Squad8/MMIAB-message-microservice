@@ -100,7 +100,7 @@ def save_draft(body):  # noqa: E501
 
         if "delivery_date" in body and body["delivery_date"] != "":
             draft.delivery_date = datetime.strptime(
-                body["delivery_date"], "%m/%d/%Y, %H:%M:%S"
+                body["delivery_date"], "%Y-%m-%dT%H:%M"
             )
 
         Message_Manager.create_message(draft)
@@ -130,12 +130,12 @@ def update_draft(draft_id, body):  # noqa: E501
         if "recipient" in body and body["recipient"] != "":
             draft.recipient = body["recipient"]
 
-        if "media" in body and body["media"] != "":
+        if "media" in body:
             draft.media = bytearray(body["media"], "utf-8")
 
         if "delivery_date" in body and body["delivery_date"] != "":
             draft.delivery_date = datetime.strptime(
-                body["delivery_date"], "%m/%d/%Y, %H:%M:%S"
+                body["delivery_date"], "%Y-%m-%dT%H:%M"
             )
 
         Message_Manager.create_message(draft)

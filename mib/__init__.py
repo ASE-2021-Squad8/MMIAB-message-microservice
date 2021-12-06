@@ -112,11 +112,10 @@ def register_specifications(_api_app):
 
 def create_celery(flask_app):
     # broker's url and storing results
-    BACKEND = BROKER = "redis://redis:6379"
+    BACKEND = BROKER = "redis://localhost:6379/0"
 
-    celery = Celery(__name__)
+    celery = Celery(__name__, broker=BROKER, backend=BACKEND)
 
-    # , backend=BACKEND, broker=BROKER)
     # set timezone
     celery.conf.timezone = "UTC"
     return celery

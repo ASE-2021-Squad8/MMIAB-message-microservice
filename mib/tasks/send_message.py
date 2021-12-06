@@ -9,8 +9,8 @@ from mib.dao.message_manager import Message_Manager
 
 _APP = None
 logger = get_logger(__name__)
-SEND_NOTIFICATION_MS = "http://127.0.0.1:5000/api/"
-USER_MS = "http://127.0.0.1:5000/api/"
+USER_MS = "http://127.0.0.1:10001/api/"
+SEND_NOTIFICATION_MS = "http://127.0.0.1:10003/api/"
 
 
 @decorators.task(name="mib.tasks.send_message.send_message")

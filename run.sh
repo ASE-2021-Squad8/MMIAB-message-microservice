@@ -3,4 +3,4 @@
 # set the env to development
 export FLASK_ENV=development
 
-flask run --port=5002
+flask run --port=10002
