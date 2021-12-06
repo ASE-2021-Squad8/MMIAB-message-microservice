@@ -183,7 +183,7 @@ def send_message(body):  # noqa: E501
     msg.text = text
     if message_id is not None and message_id > 0:  # I have to sent a draft
         msg.message_id = message_id
-        id = Message_Manager.update(msg)
+        id = Message_Manager.update_message(msg)
     else:
         id = Message_Manager.create_message(msg)
 
