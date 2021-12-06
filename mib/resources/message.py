@@ -174,24 +174,28 @@ def send_message(body):  # noqa: E501
 
     # timezone
     t = pytz.timezone("Europe/Rome")
-    msg = Message()
+    msg = None
+    if message_id is not None and message_id > 0:  # I have to sent a draft
+        msg = Message_Manager.retrieve_by_id(message_id)
+    else:
+        msg = Message()
+
     msg.delivery_date = t.localize(datetime.fromisoformat(delivery_date))
     msg.is_draft = False
     msg.recipient = recipient
     msg.sender = sender
     msg.media = media
     msg.text = text
+    id = msg.message_id
+
     if message_id is not None and message_id > 0:  # I have to sent a draft
-        msg.message_id = message_id
-        id = message_id
         Message_Manager.update_message(msg)
     else:
-        id = Message_Manager.create_message(msg)
+        Message_Manager.create_message(msg)
 
     # send message via celery
     if os.getenv("FLASK_ENV") != "testing":  # pragma: no cover
         try:
-            print("QUI")
             put_message_in_queue.apply_async(
                 args=[
                     json.dumps(
@@ -205,7 +209,6 @@ def send_message(body):  # noqa: E501
                 ],  #  convert to utc
                 eta=msg.delivery_date.astimezone(pytz.utc),  # task execution time
             )
-            print("FATTO")
         except Exception as e:
             logger.exception("Send message task raised!")
     return jsonify({"message": "message scheduled"}), 201
