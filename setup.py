@@ -17,7 +17,7 @@ with open(PROJECT + "/__init__.py", "rb") as f:
 setup(
     name=PROJECT,
     version=version,
-    author="SQUAD <ID>",
+    author="SQUAD <8>",
     license="BSD 3-clause",
     packages=find_packages(),
     include_package_data=True,

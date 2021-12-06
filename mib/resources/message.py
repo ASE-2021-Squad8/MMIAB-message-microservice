@@ -10,7 +10,7 @@ from mib.dao.message_manager import Message_Manager
 from mib.models.message import Message
 from mib.tasks.send_message import send_message as put_message_in_queue
 
-USER_MS = "http://127.0.0.1:5000/api/"
+USER_MS = "http://127.0.0.1:10001/api/"
 
 
 def delete_message_lottery_points(message_id):  # noqa: E501
