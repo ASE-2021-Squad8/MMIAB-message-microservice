@@ -208,6 +208,8 @@ def send_message(body):  # noqa: E501
                     )
                 ],  #  convert to utc
                 eta=msg.delivery_date.astimezone(pytz.utc),  # task execution time
+                routing_key="message",  # to specify the queue
+                queue="message",
             )
         except Exception as e:
             logger.exception("Send message task raised!")

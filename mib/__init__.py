@@ -115,6 +115,9 @@ def create_celery(flask_app):
     #BACKEND = BROKER = "redis://redis:6379"
 
     celery = Celery(__name__)#, broker=BROKER, backend=BACKEND)
+    celery.conf.task_route = {
+        "mib.tasks.send_message.send_message": {"queue": "message"},
+    }
 
     # set timezone
     celery.conf.timezone = "UTC"
