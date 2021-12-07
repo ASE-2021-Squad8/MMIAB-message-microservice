@@ -190,7 +190,6 @@ def send_message(body):  # noqa: E501
     # send message via celery
     if os.getenv("FLASK_ENV") != "testing":  # pragma: no cover
         try:
-            print("QUI")
             put_message_in_queue.apply_async(
                 args=[
                     json.dumps(
@@ -204,7 +203,6 @@ def send_message(body):  # noqa: E501
                 ],  #  convert to utc
                 eta=msg.delivery_date.astimezone(pytz.utc),  # task execution time
             )
-            print("FATTO")
         except Exception as e:
             logger.exception("Send message task raised!")
     return jsonify({"message": "message scheduled"}), 201

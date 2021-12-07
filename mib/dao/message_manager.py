@@ -2,7 +2,8 @@ from flask.globals import request
 from mib.dao.manager import Manager
 from mib.models.message import Message
 from mib import db, logger
-import datetime
+from datetime import datetime
+import pytz
 
 
 class Message_Manager(Manager):
@@ -71,10 +72,12 @@ class Message_Manager(Manager):
 
     @staticmethod
     def get_unsent_messages():
+        t = pytz.timezone("Europe/Rome")
+        now = t.localize(datetime.now().strftime("%Y-%m-%dT%H:%M"))
         return (
             db.session.query(Message)
             .filter(Message.is_delivered == False)
-            .filter(Message.delivery_date < datetime.now())
+            .filter(Message.delivery_date < now)
             .filter(Message.is_draft == 0)
             .all()
         )
