@@ -78,6 +78,6 @@ class Message_Manager(Manager):
             db.session.query(Message)
             .filter(Message.is_delivered == False)
             .filter(Message.delivery_date < now)
-            .filter(Message.is_draft == 0)
+            .filter(Message.is_draft == False)
             .all()
         )
