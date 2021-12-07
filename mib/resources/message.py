@@ -13,6 +13,7 @@ from circuitbreaker import circuit
 
 USER_MS = app.config["USERS_MS_URL"]
 
+
 @circuit(expected_exception=requests.RequestException)
 def delete_message_lottery_points(message_id):  # noqa: E501
     """Deschedule a message spending points
@@ -46,6 +47,7 @@ def delete_message_lottery_points(message_id):  # noqa: E501
 
     Message_Manager.delete(msg=message)
     return jsonify({"message": "message deleted"}), 200
+
 
 @circuit(expected_exception=requests.RequestException)
 def get_all_received_messages_metadata(user_id):  # noqa: E501
@@ -137,6 +139,7 @@ def get_unsent_messages():  # noqa: E501
     messages = Message_Manager.get_unsent_messages()
     return jsonify(_build_metadata_list(messages)), 200
 
+
 @circuit(expected_exception=requests.RequestException)
 def send_message(body):  # noqa: E501
     """Save and schedule a new message to send
@@ -174,14 +177,14 @@ def send_message(body):  # noqa: E501
         return jsonify({"message": "user not found"}), 404
 
     # timezone
-    t = pytz.timezone("Europe/Rome")
+    # t = pytz.timezone("Europe/Rome")
     msg = None
     if message_id is not None and message_id > 0:  # I have to sent a draft
         msg = Message_Manager.retrieve_by_id(message_id)
     else:
         msg = Message()
 
-    msg.delivery_date = t.localize(datetime.fromisoformat(delivery_date))
+    msg.delivery_date = datetime.fromisoformat(delivery_date)  # t.localize()
     msg.is_draft = False
     msg.recipient = recipient
     msg.sender = sender
@@ -263,7 +266,9 @@ def get_messages_for_day(user_id, year, month, day):
 
     messages = Message_Manager.retrieve_by_user_id(user_id)
     messages = filter(
-        lambda x: (not x.is_draft) and x.delivery_date >= specified_date and x.delivery_date <= end_date,
+        lambda x: (not x.is_draft)
+        and x.delivery_date >= specified_date
+        and x.delivery_date <= end_date,
         messages,
     )
 
@@ -295,6 +300,7 @@ def _build_metadata_list(messages):
         body.append(d)
 
     return body
+
 
 @circuit(expected_exception=requests.RequestException)
 def _check_user(user_id):
