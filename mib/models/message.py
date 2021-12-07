@@ -14,6 +14,7 @@ class Message(db.Model):
         "is_deleted",
         "is_read",
         "is_delivered",
+        "message_id",
     }
     message_id: int
     text: str
