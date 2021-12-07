@@ -174,16 +174,22 @@ def send_message(body):  # noqa: E501
 
     # timezone
     t = pytz.timezone("Europe/Rome")
-    msg = Message()
+    msg = None
+    if message_id is not None and message_id > 0:  # I have to sent a draft
+        msg = Message_Manager.retrieve_by_id(message_id)
+    else:
+        msg = Message()
+
     msg.delivery_date = t.localize(datetime.fromisoformat(delivery_date))
     msg.is_draft = False
     msg.recipient = recipient
     msg.sender = sender
     msg.media = media
     msg.text = text
+
     if message_id is not None and message_id > 0:  # I have to sent a draft
-        msg.message_id = message_id
-        id = Message_Manager.update(msg)
+        Message_Manager.update_message(msg)
+        id = msg.message_id
     else:
         id = Message_Manager.create_message(msg)
 
