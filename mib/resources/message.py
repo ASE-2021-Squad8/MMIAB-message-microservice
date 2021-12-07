@@ -262,7 +262,7 @@ def get_messages_for_day(user_id, year, month, day):
 
     messages = Message_Manager.retrieve_by_user_id(user_id)
     messages = filter(
-        lambda x: x.delivery_date >= specified_date and x.delivery_date <= end_date,
+        lambda x: (not x.is_draft) and x.delivery_date >= specified_date and x.delivery_date <= end_date,
         messages,
     )
 
