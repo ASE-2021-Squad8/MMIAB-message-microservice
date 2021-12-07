@@ -30,12 +30,12 @@ def delete_message_lottery_points(message_id):  # noqa: E501
         return jsonify({"message": "message not found"}), 404
 
     if message.delivery_date < datetime.now():
-        return jsonify({"message": "message already sent"}), 404
+        return jsonify({"message": "message already sent"}), 400
 
     sender = _check_user(message.sender)
 
     if sender["points"] < 60:
-        abort(jsonify({"message": "no enough points"}), 400)
+        abort(jsonify({"message": "no enough points"}), 401)
 
     response = requests.put(
         USER_MS + "user/points/" + str(message.sender),
@@ -86,7 +86,7 @@ def get_all_sent_messages_metadata(user_id):  # noqa: E501
 
     :rtype: List[MessageMetadata]
     """
-    # _check_user(user_id)
+    _check_user(user_id)
 
     messages_list = Message_Manager.get_all_sent_messages_metadata(user_id=user_id)
 
@@ -163,7 +163,7 @@ def send_message(body):  # noqa: E501
     valid_users = False
     email_r = None
     email_s = None
-    id = None
+    _id = None
 
     response = requests.get(USER_MS + "user/" + str(sender))
     if response.status_code == 200:
@@ -176,9 +176,6 @@ def send_message(body):  # noqa: E501
     if not valid_users:
         return jsonify({"message": "user not found"}), 404
 
-    # timezone
-    # t = pytz.timezone("Europe/Rome")
-    msg = None
     if message_id is not None and message_id > 0:  # I have to sent a draft
         msg = Message_Manager.retrieve_by_id(message_id)
     else:
@@ -193,9 +190,9 @@ def send_message(body):  # noqa: E501
 
     if message_id is not None and message_id > 0:  # I have to sent a draft
         Message_Manager.update_message(msg)
-        id = msg.message_id
+        _id = msg.message_id
     else:
-        id = Message_Manager.create_message(msg)
+        _id = Message_Manager.create_message(msg)
 
     # send message via celery
     if os.getenv("FLASK_ENV") != "testing":  # pragma: no cover
@@ -204,20 +201,21 @@ def send_message(body):  # noqa: E501
                 args=[
                     json.dumps(
                         {
-                            "message_id": id,
+                            "message_id": _id,
                             "body": "You have just received a massage",
                             "recipient": email_r,
                             "sender": email_s,
                         }
                     )
-                ],  #  convert to utc
+                ],  # convert to utc
                 eta=msg.delivery_date.astimezone(pytz.utc),  # task execution time
                 routing_key="message",  # to specify the queue
                 queue="message",
             )
         except Exception as e:
             logger.exception("Send message task raised!")
-    return jsonify({"message": "message scheduled"}), 201
+
+    return jsonify({"id": _id}), 201
 
 
 def update_message_state(body):  # noqa: E501
@@ -267,8 +265,7 @@ def get_messages_for_day(user_id, year, month, day):
     messages = Message_Manager.retrieve_by_user_id(user_id)
     messages = filter(
         lambda x: (not x.is_draft)
-        and x.delivery_date >= specified_date
-        and x.delivery_date <= end_date,
+                  and specified_date <= x.delivery_date <= end_date,
         messages,
     )
 

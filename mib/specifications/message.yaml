@@ -43,6 +43,10 @@ paths:
       responses:
         "201":
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResult'
         "404":
           description: User does not exists
         default:
@@ -415,6 +419,15 @@ paths:
 
 components:
   schemas:
+    MessageResult:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique Message ID
+          example: 1
     Message:
       required:
       - delivery_date
