@@ -9,10 +9,11 @@ from mib import logger, app
 from mib.dao.message_manager import Message_Manager
 from mib.models.message import Message
 from mib.tasks.send_message import send_message as put_message_in_queue
+from circuitbreaker import circuit
 
 USER_MS = app.config["USERS_MS_URL"]
 
-
+@circuit(expected_exception=requests.RequestException)
 def delete_message_lottery_points(message_id):  # noqa: E501
     """Deschedule a message spending points
 
@@ -46,7 +47,7 @@ def delete_message_lottery_points(message_id):  # noqa: E501
     Message_Manager.delete(msg=message)
     return jsonify({"message": "message deleted"}), 200
 
-
+@circuit(expected_exception=requests.RequestException)
 def get_all_received_messages_metadata(user_id):  # noqa: E501
     """Get all received messages metadata of an user
 
@@ -136,7 +137,7 @@ def get_unsent_messages():  # noqa: E501
     messages = Message_Manager.get_unsent_messages()
     return jsonify(_build_metadata_list(messages)), 200
 
-
+@circuit(expected_exception=requests.RequestException)
 def send_message(body):  # noqa: E501
     """Save and schedule a new message to send
 
@@ -295,7 +296,7 @@ def _build_metadata_list(messages):
 
     return body
 
-
+@circuit(expected_exception=requests.RequestException)
 def _check_user(user_id):
     response = requests.get(USER_MS + "user/" + str(user_id))
 
