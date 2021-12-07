@@ -5,8 +5,8 @@ University of Pisa.
 
 ## Team info
 
-- The *squad id* is **<SQUAD_ID>**
-- The *team leader* is *<TEAM_LEADER>*
+- The *squad id* is **<8>**
+- The *team leader* is *<Carlo Leo>*
 
 #### Members
 
@@ -14,8 +14,8 @@ Mark with *bold* the person(s) that has developed this microservice.
 
 |Name and Surname    | Email                         |
 |--------------------|-------------------------------|
-|*Mario Rossi*       |mario.rossi@unipi.it           |
-|Antonio Lupo        |antonio.lupo@unipi.it          |
+|*Eli Melucci*       |e.melucci1@studenti.unipi.it   |
+|*Carlo Leo*         |c.leo5@studenti.unipi.it   |
 |*Susanna Lopez*     |susy.lopez@mit.edu             |
 
 
