@@ -73,7 +73,7 @@ class Message_Manager(Manager):
     @staticmethod
     def get_unsent_messages():
         t = pytz.timezone("Europe/Rome")
-        now = t.localize(datetime.now().strftime("%Y-%m-%dT%H:%M"))
+        now = t.localize(datetime.strptime(datetime.now().strftime("%Y-%m-%dT%H:%M"), "%Y-%m-%dT%H:%M"))
         return (
             db.session.query(Message)
             .filter(Message.is_delivered == False)
