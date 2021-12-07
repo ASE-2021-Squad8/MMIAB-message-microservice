@@ -229,7 +229,7 @@ def update_message_state(body):  # noqa: E501
     message_id = put_body["message_id"]
     state = put_body["value"]
 
-    if attribute not in ["is_draft", "is_read", "is_delivered"]:
+    if attribute not in ["is_draft", "is_read", "is_delivered", "is_deleted"]:
         return jsonify({"message": "cannot update " + str(attribute)}), 400
 
     msg = Message_Manager.retrieve_by_id(message_id)
@@ -257,12 +257,8 @@ def get_messages_for_day(user_id, year, month, day):
 
     _check_user(user_id)
 
-    specified_date = datetime.strptime(
-        f"{year}-{month}-{day}T00:00", "%Y-%m-%dT%H:%M"
-    )
-    end_date = datetime.strptime(
-        f"{year}-{month}-{day}T23:59", "%Y-%m-%dT%H:%M"
-    )
+    specified_date = datetime.strptime(f"{year}-{month}-{day}T00:00", "%Y-%m-%dT%H:%M")
+    end_date = datetime.strptime(f"{year}-{month}-{day}T23:59", "%Y-%m-%dT%H:%M")
 
     messages = Message_Manager.retrieve_by_user_id(user_id)
     messages = filter(
