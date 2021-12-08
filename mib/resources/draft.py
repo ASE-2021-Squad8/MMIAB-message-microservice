@@ -1,9 +1,10 @@
-from flask import jsonify, abort
-from mib.dao.message_manager import Message_Manager
-from mib.models.message import Message
 from datetime import datetime
 
 import connexion
+from flask import abort, jsonify
+
+from mib.dao.message_manager import Message_Manager
+from mib.models.message import Message
 
 
 def delete_draft(draft_id):  # noqa: E501

@@ -1,9 +1,9 @@
-import unittest
-import json
 import base64
-import responses
-
+import json
+import unittest
 from datetime import datetime
+
+import responses
 
 
 class TestMessages(unittest.TestCase):
@@ -277,4 +277,3 @@ class TestMessages(unittest.TestCase):
         reply = self.client.delete(f"/api/lottery/{msg_id}")
         # sender has enough points
         assert reply.status_code == 400
-

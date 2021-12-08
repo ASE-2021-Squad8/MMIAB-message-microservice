@@ -4,12 +4,13 @@ from datetime import datetime
 
 import pytz
 import requests
+from circuitbreaker import circuit
 from flask import abort, jsonify, request
-from mib import logger, app
+
+from mib import app, logger
 from mib.dao.message_manager import Message_Manager
 from mib.models.message import Message
 from mib.tasks.send_message import send_message as put_message_in_queue
-from circuitbreaker import circuit
 
 USER_MS = app.config["USERS_MS_URL"]
 
@@ -264,8 +265,7 @@ def get_messages_for_day(user_id, year, month, day):
 
     messages = Message_Manager.retrieve_by_user_id(user_id)
     messages = filter(
-        lambda x: (not x.is_draft)
-                  and specified_date <= x.delivery_date <= end_date,
+        lambda x: (not x.is_draft) and specified_date <= x.delivery_date <= end_date,
         messages,
     )
 

@@ -1,7 +1,6 @@
-import unittest
-import json
 import base64
-
+import json
+import unittest
 from datetime import datetime
 
 

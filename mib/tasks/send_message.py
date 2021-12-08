@@ -1,12 +1,11 @@
-from celery.utils.log import get_logger
 import json
 
-from celery import decorators
 import requests
-from mib import app 
+from celery import decorators
+from celery.utils.log import get_logger
 
+from mib import app
 from mib.dao.message_manager import Message_Manager
-
 
 _APP = None
 logger = get_logger(__name__)
