@@ -76,7 +76,6 @@ class ProdConfig(DevConfig):
     POSTGRES_DB = os.getenv('POSTGRES_DB', None)
     POSTGRES_HOST = os.getenv('POSTGRES_HOST', None)
     POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
-    SQLALCHEMY_DATABASE_URI = 'postgres://%s:%s@%s:%s/%s' % (
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%s/%s' % (
         POSTGRES_USER, POSTGRES_PASS, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB)
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
