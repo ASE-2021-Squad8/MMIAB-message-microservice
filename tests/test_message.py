@@ -96,16 +96,25 @@ class TestMessages(unittest.TestCase):
             "/api/message", data=json.dumps(message), content_type="application/json"
         )
         assert reply.status_code == 201
+        msg_id = reply.get_json()["id"]
 
         # update message state
         reply = self.client.put(
             "/api/message",
             data=json.dumps(
-                {"attribute": "is_delivered", "value": True, "message_id": 1}
+                {"attribute": "is_delivered", "value": True, "message_id": msg_id}
             ),
             content_type="application/json",
         )
         assert reply.status_code == 200
+
+        # retrieve sent message
+        reply = self.client.get(f"/api/message/{1}/sent/metadata")
+        assert reply.status_code == 200
+        json_data = reply.get_json()
+        # expect one message
+        assert len(json_data) == 1
+        assert json_data[0]["has_media"]
 
         # retrieve received message
         reply = self.client.get(f"/api/message/{2}/received/metadata")
@@ -199,7 +208,7 @@ class TestMessages(unittest.TestCase):
         # expect user not found
         assert reply.status_code == 404
 
-        reply = self.client.delete(f"/api/lottery/{1}")
+        reply = self.client.delete(f"/api/lottery/{69420}")
 
         # expect message not found
         assert (
@@ -211,26 +220,26 @@ class TestMessages(unittest.TestCase):
     def test_delete_lottery_message(self):
         responses.add(
             responses.GET,
-            self.user_service_endpoint + "user/" + str(1),
+            self.user_service_endpoint + "user/" + str(45),
             json={"email": "sender@example.com", "points": 50},
             status=200,
         )
         responses.add(
             responses.GET,
-            self.user_service_endpoint + "user/" + str(2),
+            self.user_service_endpoint + "user/" + str(46),
             json={"email": "sender@example.com", "points": 60},
             status=200,
             content_type="application/json",
         )
         responses.add(
             responses.PUT,
-            url=self.user_service_endpoint + "user/points/" + str(2),
+            url=self.user_service_endpoint + "user/points/" + str(46),
             status=200,
         )
         # send message
         message = dict(
-            sender=2,
-            recipient=1,
+            sender=46,
+            recipient=45,
             text="Hello hello fantastic",
             media=base64.b64encode(b"Fantastic picture!").decode("utf-8"),
             delivery_date=datetime(2222, 1, 1).isoformat(),
@@ -243,7 +252,29 @@ class TestMessages(unittest.TestCase):
         )
         # expect created
         assert reply.status_code == 201
+        msg_id = reply.get_json()["id"]
 
-        reply = self.client.delete(f"/api/lottery/{1}")
+        reply = self.client.delete(f"/api/lottery/{msg_id}")
         # sender has enough points
         assert reply.status_code == 200
+
+        message = dict(
+            sender=46,
+            recipient=45,
+            text="Hello hello fantastic",
+            media=base64.b64encode(b"Fantastic picture!").decode("utf-8"),
+            delivery_date=datetime(1980, 1, 1).isoformat(),
+        )
+
+        reply = self.client.post(
+            "/api/message",
+            data=json.dumps(message),
+            content_type="application/json",
+        )
+        assert reply.status_code == 201
+        msg_id = reply.get_json()["id"]
+
+        reply = self.client.delete(f"/api/lottery/{msg_id}")
+        # sender has enough points
+        assert reply.status_code == 400
+

@@ -14,6 +14,7 @@ class Message(db.Model):
         "is_deleted",
         "is_read",
         "is_delivered",
+        "message_id",
     }
     message_id: int
     text: str
@@ -44,4 +45,6 @@ class Message(db.Model):
         super(Message, self).__init__(*args, **kw)
 
     def serialize(self):
-        return dict([(k, self.__getattribute__(k)) for k in self.SERIALIZE_LIST])
+        d = dict([(k, self.__getattribute__(k)) for k in self.SERIALIZE_LIST])
+        d.update({"has_media": self.media is not None and len(self.media) > 0})
+        return d
