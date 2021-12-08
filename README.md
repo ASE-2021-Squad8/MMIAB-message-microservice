@@ -51,11 +51,4 @@ The `run.sh` script defaults to a development environment.
 
 To run all the tests, execute the following command:
 
-`python -m pytest -v`
-
-You can also specify one or more specific test files, in order to run only those specific tests.
-In case you also want to see the overall coverage of the tests, execute the following command:
-
-`python -m pytest -v --cov-report term-missing`
-
----
+`bash pytest.sh`
