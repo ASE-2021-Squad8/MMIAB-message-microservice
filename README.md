@@ -1,5 +1,5 @@
 # Messages MS | My Message In A Bottle
-[![Unit tests](https://github.com/ASE-2021-Squad8/MMIAB-message-microservice/actions/workflows/tests.yml/badge.svg)](https://github.com/ASE-2021-Squad8/MMIAB-message-microservice/actions/workflows/tests.yml)
+[![Unit tests](https://github.com/ASE-2021-Squad8/MMIAB-message-microservice/actions/workflows/tests.yml/badge.svg)](https://github.com/ASE-2021-Squad8/MMIAB-message-microservice/actions/workflows/tests.yml) [![Docker Image CI](https://github.com/ASE-2021-Squad8/MMIAB-message-microservice/actions/workflows/docker-image.yml/badge.svg)](https://github.com/ASE-2021-Squad8/MMIAB-message-microservice/actions/workflows/docker-image.yml)
 
 This is the source code of Message in a Bottle application, self project of *Advanced Software Engineering* course,
 University of Pisa.
